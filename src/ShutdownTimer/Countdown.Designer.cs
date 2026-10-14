@@ -76,14 +76,14 @@
             this.titleLabel.Name = "titleLabel";
             this.titleLabel.Size = new System.Drawing.Size(215, 31);
             this.titleLabel.TabIndex = 10;
-            this.titleLabel.Text = "Shutdown Timer";
+            this.titleLabel.Text = "定时关机助手";
             // 
             // notifyIcon
             // 
-            this.notifyIcon.BalloonTipTitle = "Shutdown Timer";
+            this.notifyIcon.BalloonTipTitle = "定时关机助手";
             this.notifyIcon.ContextMenuStrip = this.contextMenuStrip;
             this.notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon.Icon")));
-            this.notifyIcon.Text = "Shutdown Timer";
+            this.notifyIcon.Text = "定时关机助手";
             this.notifyIcon.Visible = true;
             // 
             // contextMenuStrip
@@ -107,28 +107,28 @@
             // 
             this.timerPauseMenuItem.Name = "timerPauseMenuItem";
             this.timerPauseMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.timerPauseMenuItem.Text = "Pause";
+            this.timerPauseMenuItem.Text = "暂停";
             this.timerPauseMenuItem.Click += new System.EventHandler(this.TimerPauseMenuItem_Click);
             // 
             // timerStopMenuItem
             // 
             this.timerStopMenuItem.Name = "timerStopMenuItem";
             this.timerStopMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.timerStopMenuItem.Text = "Stop and exit";
+            this.timerStopMenuItem.Text = "停止并退出";
             this.timerStopMenuItem.Click += new System.EventHandler(this.TimerStopMenuItem_Click);
             // 
             // timerResetMenuItem
             // 
             this.timerResetMenuItem.Name = "timerResetMenuItem";
             this.timerResetMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.timerResetMenuItem.Text = "Reset timer";
+            this.timerResetMenuItem.Text = "重置计时";
             this.timerResetMenuItem.Click += new System.EventHandler(this.TimerResetMenuItem_Click);
             // 
             // appRestartMenuItem
             // 
             this.appRestartMenuItem.Name = "appRestartMenuItem";
             this.appRestartMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.appRestartMenuItem.Text = "Restart application";
+            this.appRestartMenuItem.Text = "重启程序";
             this.appRestartMenuItem.Click += new System.EventHandler(this.AppRestartMenuItem_Click);
             // 
             // toolStripSeparator1
@@ -140,7 +140,7 @@
             // 
             this.timerUIHideMenuItem.Name = "timerUIHideMenuItem";
             this.timerUIHideMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.timerUIHideMenuItem.Text = "Move to background";
+            this.timerUIHideMenuItem.Text = "最小化到后台";
             this.timerUIHideMenuItem.Click += new System.EventHandler(this.TimerUIHideMenuItem_Click);
             // 
             // timerUIShowMenuItem
@@ -148,7 +148,7 @@
             this.timerUIShowMenuItem.Enabled = false;
             this.timerUIShowMenuItem.Name = "timerUIShowMenuItem";
             this.timerUIShowMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.timerUIShowMenuItem.Text = "Show countdown window";
+            this.timerUIShowMenuItem.Text = "显示倒计时窗口";
             this.timerUIShowMenuItem.Click += new System.EventHandler(this.TimerUIShowMenuItem_Click);
             // 
             // toolStripSeparator2
@@ -159,7 +159,7 @@
             // timeMenuItem
             // 
             this.timeMenuItem.Enabled = false;
-            this.timeMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.timeMenuItem.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F);
             this.timeMenuItem.Name = "timeMenuItem";
             this.timeMenuItem.ReadOnly = true;
             this.timeMenuItem.Size = new System.Drawing.Size(100, 23);
@@ -168,7 +168,7 @@
             // 
             this.updateTimeMenuItem.Name = "updateTimeMenuItem";
             this.updateTimeMenuItem.Size = new System.Drawing.Size(212, 22);
-            this.updateTimeMenuItem.Text = "Set a new countdown";
+            this.updateTimeMenuItem.Text = "设置新的倒计时";
             this.updateTimeMenuItem.Click += new System.EventHandler(this.UpdateTimeMenuItem_Click);
             // 
             // titlebarPictureBox
@@ -198,8 +198,8 @@
             // 
             // Countdown
             // 
-            this.AccessibleDescription = "Shows the time left until power action gets executed.";
-            this.AccessibleName = "Shutdown Timer Countdown";
+            this.AccessibleDescription = "显示距离执行电源动作的剩余时间。";
+            this.AccessibleName = "定时关机助手 - 倒计时";
             this.AccessibleRole = System.Windows.Forms.AccessibleRole.Alert;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -216,7 +216,7 @@
             this.Name = "Countdown";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Countdown";
+            this.Text = "倒计时";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Countdown_FormClosing);
             this.Load += new System.EventHandler(this.Countdown_Load);

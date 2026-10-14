@@ -45,9 +45,9 @@ namespace ShutdownTimer
             this.titleLabel.Font = new System.Drawing.Font("Microsoft YaHei UI", 18F, System.Drawing.FontStyle.Bold);
             this.titleLabel.Location = new System.Drawing.Point(12, 9);
             this.titleLabel.Name = "titleLabel";
-            this.titleLabel.Size = new System.Drawing.Size(62, 31);
+            this.titleLabel.Size = new System.Drawing.Size(50, 31);
             this.titleLabel.TabIndex = 10;
-            this.titleLabel.Text = "title";
+            this.titleLabel.Text = "标题";
             // 
             // titlebarPictureBox
             // 
@@ -69,7 +69,7 @@ namespace ShutdownTimer
             this.messageLabel.Name = "messageLabel";
             this.messageLabel.Size = new System.Drawing.Size(268, 56);
             this.messageLabel.TabIndex = 20;
-            this.messageLabel.Text = "description";
+            this.messageLabel.Text = "描述";
             // 
             // inputTextBox
             // 
@@ -85,12 +85,12 @@ namespace ShutdownTimer
             // 
             this.okButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.okButton.Enabled = false;
-            this.okButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.okButton.Font = new System.Drawing.Font("Microsoft YaHei UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.okButton.Location = new System.Drawing.Point(119, 136);
             this.okButton.Name = "okButton";
             this.okButton.Size = new System.Drawing.Size(86, 23);
             this.okButton.TabIndex = 40;
-            this.okButton.Text = "OK";
+            this.okButton.Text = "确定";
             this.okButton.UseVisualStyleBackColor = true;
             this.okButton.Click += new System.EventHandler(this.OkButton_Click);
             // 
@@ -102,7 +102,7 @@ namespace ShutdownTimer
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 50;
-            this.cancelButton.Text = "Cancel";
+            this.cancelButton.Text = "取消";
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.CancelButton_Click);
             // 

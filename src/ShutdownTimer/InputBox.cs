@@ -19,13 +19,13 @@ namespace ShutdownTimer
 
         private void InputBox_Load(object sender, EventArgs e)
         {
-            Text = "Shutdown Timer - " + Title;
+            Text = "定时关机助手 - " + Title;
             titleLabel.Text = Title;
             messageLabel.Text = Message;
             if (PasswordMode) { inputTextBox.PasswordChar = Convert.ToChar("*"); }
 
-            // Prevent font-fallback and subsequent layout issues. This application is currently only in English and doesn't require display of non-Latin characters.
-            this.Font = new Font("Microsoft Sans Serif", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
+            // 使用微软雅黑以正确显示中文字符，避免字体回退导致的排版问题。
+            this.Font = new Font("Microsoft YaHei UI", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
         }
 
         private void OkButton_Click(object sender, EventArgs e)

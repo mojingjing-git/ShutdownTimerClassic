@@ -1,138 +1,116 @@
-# Shutdown Timer Classic 🕒
+# Shutdown Timer Classic 中文版
 
-Shutdown Timer Classic is a small Windows application that allows you to set a timer that will shut down, restart, hibernate, sleep, or lock your PC.
+## ⚠️ 本仓库是第三方 Fork，非原创项目
 
-![Screenshot of the main menu](media/screenshots/Menu.png)
+| 项目 | 内容 |
+|---|---|
+| **上游原创项目** | <https://github.com/lukaslangrock/ShutdownTimerClassic> |
+| **原作者 / 版权归属** | **Lukas Langrock** |
+| **上游许可证** | MIT —— [LICENSE](LICENSE) 原封未改 |
+| **本仓库基于** | 上游 `master` 分支提交 `22ac336`（2026-10-13） |
+| **本仓库的改动** | 仅两项：界面汉化 + 高 DPI 配置修复（详见下方「相对上游的改动」） |
+| **上游英文说明** | [README.upstream.md](README.upstream.md) |
 
-I am also planning on developing a more advanced and sleek version of this app in the future.
+本仓库保留了上游的**完整 git 历史**（237 个上游提交，起点 2019-10-02），原作者的版权声明、LICENSE、控件命名与代码归属均未作任何改动。本仓库建立在原作者的劳动成果之上，**所有原始设计功劳归于 Lukas Langrock**；本地化仅是增加了一层中文界面与一处配置修复。
 
-**Want to contribute or take a look at my code?** Awesome, I welcome all and any contributions and would love to hear your opinion.
-Take a look at my [file and folder structure](Structure.md) document to read more about how everything ties together.
+如果你需要未汉化的原版，请前往上游仓库或 Microsoft Store 获取。
 
-# Installation 💿
+---
 
-**Recommended**: [Microsoft Store](https://www.microsoft.com/store/apps/9NTDG6C9BTTW?cid=github.com)
+## 这是什么
 
-The Microsoft Store is the only official download that will receive automatic updates (as they are managed by Microsoft as opposed to the application itself, which isn't connected to the internet and cannot check for updates).
+一个轻量的 Windows 定时关机工具：设定时间，到点执行关机 / 重启 / 休眠 / 睡眠 / 注销 / 锁定 / 自定义命令。
 
-**Alternative**: [GitHub Releases](https://github.com/lukaslangrock/ShutdownTimerClassic/releases) or [my mirror](https://files.langrock.info/apps/ShutdownTimerClassic/).
+上游版本仅有英文界面。本仓库提供完整的简体中文界面，并修复了上游在高 DPI 缩放下的一处配置冲突。
 
-These builds are provided with each stable release and include both the binaries themselves for portable use and an installer. If you want to use the raw binaries themselves, please extract the entire archive and keep all the files in the same folder.
+## 相对上游的改动
 
-**Development builds**: As this is a low priority side project of mine, releases are rare. However, the CI for this project is set up to produce and publish build artifacts for each new commit. These are development builds; they might not work correctly and they may represent features in an unfinished state, so use them at your own discretion (this is also why there is no link here; they are not meant for people unfamiliar with software development).
+### 1. 界面汉化（完整覆盖）
 
-# Usage ✨
+主界面、倒计时窗口、托盘右键菜单、设置页三个页签、输入框、全部对话框与气泡通知，以及设置页 About 中的说明文本，全部翻译为简体中文。
 
-Shutdown Timer is a simple application, so it is easy to use.
-Just choose a power action from the drop-down menu and then dial in the time span you want. If the counter reaches zero, the chosen power action will be executed.
+界面字体由 `Microsoft Sans Serif` 替换为**微软雅黑 UI**，避免中文字形回退造成的排版异常。
 
-Upon reaching zero, the Shutdown Timer will (actually Windows will do this, Shutdown Timer just gives the command to) force close any still running applications to ensure the shutdown does not get interrupted.
-Therefore you may experience data loss if any application is in the process of saving or processing data when the shutdown begins.
-You can combat this by selecting a longer timespan to ensure the running applications has enough headroom to complete its operation or by choosing the *Sleep* or *Hibernate* power actions.
+### 2. 显示值与内部值分离
 
-If you are certain that all applications will exit properly and will not require any human interaction (like a word processor which would open a save dialog when being told to exit), you can choose a graceful shutdown which will just execute a regular shutdown as if you were to manually shutdown Windows yourself.
-This means that all applications will have enough time to exit and nothing is forced to exit (which also means that applications can interrupt the shutdown).
-Thus you should be careful to use this mode as it might result in a failed shutdown.
-*The graceful mode applies to all power actions which force close apps and is not exclusive to a shutdown.*
+这是汉化过程中最需要小心的地方。
 
-By default, the countdown window will be always on top of every other window so you don't forget that you have an active shutdown timer. The countdown can also be hidden by selecting the "Run in background" checkbox under the dropdown menu. If the countdown is already running you can just right click anywhere in the countdown window to bring up a menu with the option to minimize the countdown to the background. It can also be brought back from the background by using the tray menu (described below).
+上游把下拉框的显示文本直接当作业务逻辑的内部值使用：
 
-![Screenshot of the main menu with extended combobox](media/screenshots/Menu2.png)
+- `Timer.ExecutePowerAction` 用 `switch` 精确匹配英文 `"Shutdown"` / `"Restart"` / `"Hibernate"` / `"Sleep"` / `"Logout"` / `"Lock"` / `"Custom Command"`
+- 托盘主题下拉框被 `Countdown.cs` 拿来比较 `"Light"` / `"Dark"`
+- 设置文件（JSON）中持久化的同样是这些英文字符串
+- 命令行参数也使用英文动作名
 
-![Screenshot of the settings window](media/screenshots/Settings.png)
-![Screenshot of the right click menu](media/screenshots/RightClickMenu.png)
+**如果直接翻译下拉框文字，关机动作会全部落入 `default` 分支而根本不执行，已有配置文件也会失效。**
 
-# Colors 🎨
+因此本版本新增 `src/ShutdownTimer/LocalizedCatalog.cs`：下拉框显示中文，内部值保持英文（通过重写 `ToString()` 实现），代码侧统一使用 `GetValue()` / `SelectValue()` 读写英文值。共调整 12 处调用点，两处 `switch` 分支和所有 JSON 属性名一字未动。
 
-The countdown window has 4 different background colors to visualize the time left and one animation to draw your attention when the time is about to run out, in case you forget about the shutdown timer.
-Here is a quick overview:
+> 结果：**界面是中文的，配置文件格式与命令行行为与英文版完全兼容。**
 
-| Time left     | Color         | Animated  |
-| ------------- | ------------- | --------- |
-| > 30 min.     | Green         | No        |
-| 30 - 10 min.  | Yellow        | No        |
-| 10 - 1 min.   | Orange        | No        |
-| < 1min.       | Red / Black   | Yes       |
+### 3. 高 DPI（Per-Monitor V2）修复
 
-![Screenshot of countdown window with green background](media/screenshots/CountdownGreen.png)
-![Screenshot of countdown window with yellow background](media/screenshots/CountdownYellow.png)
-![Screenshot of countdown window with orange background](media/screenshots/CountdownOrange.png)
-![Screenshot of countdown window with red background](media/screenshots/CountdownRed.png)
-![Screenshot of countdown window with black background](media/screenshots/CountdownBlack.png)
+上游存在一处配置冲突：
 
-# Tray Menu 🔧
+- `App.config` 声明了 `DpiAwareness = PerMonitorV2`
+- 但 `app.manifest` 只声明了旧式的 `<dpiAware>true</dpiAware>`（System DPI aware）
+- 且从未设置 `EnableWindowsFormsHighDpiAutoResizing`
 
-Shutdown Timer also includes a tray menu to control the application from you Taskbar tray. Just right click the icon to bring it up (you may need to click on the little arrow on the right of your Taskbar to find the Shutdown Timer icon). You can stop, restart and view the timer from it and also switch the UI mode to hide or show the countdown window.
+manifest 会在进程启动时将其标记为 System DPI aware，之后的 PerMonitorV2 请求**无法再升级进程**。实际结果是 Windows 对整个应用做位图拉伸缩放，在 125% / 150% / 175% / 200% 缩放下表现为**文字发虚、控件错位**。
 
-![Screenshot of the tray menu](media/screenshots/TrayMenu.png)
+本版本：
 
-The same menu can also be accessed by right clicking in the countdown window.
+- `app.manifest` → `true/pm` 加上 Windows 10 1703+ 的 `<dpiAwareness>PerMonitorV2, PerMonitor</dpiAwareness>`
+- `App.config` → 增加 `EnableWindowsFormsHighDpiAutoResizing`
 
-# CLI 💻
+该项修复已单独向上游提交 PR：<https://github.com/lukaslangrock/ShutdownTimerClassic/pull/65>
 
-You can also use the command line to start the Shutdown Timer with specific arguments and settings.  
-**Warning**: The application does not validate arguments the same way it does user input within the form. Spelling errors or missing arguments can cause unintended behaviour. Please test your command before using it in scripts!
+### 4. 目标框架
 
-To launch the application with additional arguments, navigate to folder where the application binary can be found with your file explorer. If you are using the Microsoft Store version, I recommend downloading a second version from the GitHub releases page instead, as the binaries from the Store are not intended to be launched by the user.  
+`v4.8` → `v4.8.1`。4.8.1 是 4.8 的服务更新版，与 Windows 11 22H2 及以后自带的运行时一致。
 
-For installations with the Installer, you should find the folder at `C:\Program Files (x86)\Lukas Langrock\Shutdown Timer Classic`.
-If you opted for the ZIP without an isntaller, copy **all** the files in the ZIP to any folder of your choosing and do not rename any files itself.
+## AI 参与声明
 
-Now, right click in the explorer, select "Open in Terminal" and type `.\ShutdownTimerClassic.exe`, adding the respective arguments using their exact name and separated by a space:
+**本仓库的本地化与修复工作由 AI 编码助手（MiniMax M3.1）完成。**
 
-```
-Argument                 Description
+具体涵盖：代码结构分析、字符串耦合关系排查、本地化映射层设计、全部界面文本翻译、高 DPI 问题定位与修复，以及本文件的撰写。人类维护者审阅了最终改动并承担责任。
 
-/SetTime <time>          Sets the time for the countdown. Either type in the seconds, use HH:mm:ss or HH:mm.
+上游作者未参与本仓库的工作，亦未为其背书。原项目作者为 Lukas Langrock。
 
-/SetAction <action>      Sets the power action which will be executed after the countdown reached zero.
-                         Type in the exact name as seen in the UI (eg: Shutdown, Restart or Sleep. Do not use other variations like shutdown, Reboot, SLEEP, ...).
+## 构建方式
 
-/SetMode <mode>          Sets the control mode. This is required for any CLI arguments to take effect. Modes available:
-                         Prefill:       Prefills settings but lets the user manually change them too. Timer won't start automatically.
-                         Lock:          Overrides settings so the user cannot change them. Timer won't start automatically.
-                         Launch:        Overrides settings and starts the timer.
-                         ForcedLaunch:  Overrides settings and starts the timer. Disables all UI controls and exit dialogs.
+需要安装 **.NET Framework 4.8.1 Developer Pack**（仅运行时不够）。
 
-/SetPassword <password>  Sets a password for locking the UI. The password is stored in application memory but is trivial to leak due to being passed as an argument. Also appears in log files if the application crashes!
-                         Do NOT re-use a password that you require to stay secret!
-
-/SetCommand <command>	 Sets a command (or file) to execute in case you selected the "Custom Command" action. Runs with permissions of the current user.
-
-/Graceful                Will use the graceful mode if available. This means that your computer will do a normal, interruptible, shutdown.
-                         Your shutdown might fail when apps resist the close event. Only use this if you know what you are doing.
-
-/AllowSleep              Allows your computer to go to sleep while the countdown is active.
-
-/Background              Runs the countdown in the background.
-                         This is not a silent mode, the user will still get notifications and can use the tray menu.
-
-/NoSettings              Uses temporary ephemeral settings and ignores the `settings.json` file.
-
-/TargetTimeOfDay         Counts down towards a given time (of day) instead of counting down from it.
+```powershell
+# 还原依赖并编译 Release
+msbuild src\ShutdownTimer\ShutdownTimer.csproj /restore /p:Configuration=Release
 ```
 
-Example: `.\ShutdownTimerClassic.exe /SetTime 01:00 /SetAction Hibernate /SetMode Launch`
-This command will launch Shutdown Timer in hibernation mode with 1 hour, 0 minutes, and 0 seconds and start the countdown.
+产物位于 `src\ShutdownTimer\bin\Release\`。其中 `ShutdownTimerClassic.exe`、`Newtonsoft.Json.dll` 与 `ShutdownTimerClassic.exe.config` **三者必须放在同一目录**才能运行。
 
-If you want to redistribute my executable with your own app/script you are free to do so. Please just keep it updated and mention this project somewhere in the description (ie: follow the license for this project).
+## 已知限制
 
-# Behavior 📄
+- **未做代码签名**：自编译产物没有微软商店的数字签名。首次运行时 Windows SmartScreen 可能提示风险，选择「更多信息 → 仍要运行」即可。本地运行不受影响。
+- **无法通过 Microsoft Store 分发**：本版本不包含商店打包资源，也不满足商店认证要求。
+- **数据安全**：上游 README 明确说明，该应用默认会强制关闭仍在运行的程序，正在保存的数据可能丢失。勾选「安全关机（不强制关闭程序）」可以避免这一点，但若某程序无响应则可能导致关机失败。
+- **AI 生成**：如上所述，界面文本与代码改动由 AI 生成，未经上游作者审阅。
 
-## Shutdown sequence
+## 与上游的关系
 
-When a shutdown is executed all windows will be closed, regardless if they resist or not so any unsaved work will be gone! This is done to be sure your PC shuts down and can not be stopped by another process.
+- 基于上游 `master` 分支的 `22ac336`（2026-10-13）
+- 上游仓库：<https://github.com/lukaslangrock/ShutdownTimerClassic>
+- 上游采用 MIT 许可，允许 fork、修改与再分发，本仓库保留原作者版权声明
+- 同步上游更新的方式（仓库已配置好 remote，无需手动添加）：
 
-If you wish to have a normal shutdown you may enable the graceful mode. This will not force close any apps, but might lead to a failed shutdown as any apps which do not exit upon request can pause the shutdown. Apps might not close because they are unresponsive, require user interactions, or are still working. 
+```powershell
+# origin   -> 本仓库的 GitHub fork（用于推送）
+# upstream -> lukaslangrock/ShutdownTimerClassic（官方上游）
+git fetch upstream
+git rebase upstream/master
+```
 
-Please note that I am not liable for any data loss because you didn't save that extremely important document and now it's gone. That is your fault!
+汉化改动集中在界面文本与配置文件，冲突面很小。若上游将来自行加入多语言支持，可优先考虑改用其方案。
 
-## Canceling the shutdown
+## 许可证
 
-As long as the timer has not reached zero, you can cancel the countdown at any time by simply pressing the close button (that big X in the top right corner). A dialog will then pop up asking you if you want to cancel. If you choose so, the countdown will be immediately canceled and another message will tell you that the countdown was successfully canceled and that the application will close after clicking OK. At this point, the countdown has already stopped and you have all the time you want before clicking ok, which results in the application closing itself.
-
-If you are running it in the background, then you can go to the notification area (click on the arrow on the right side of your taskbar) and right-click on the application icon. This will bring up a menu with the option "Stop and exit". Clicking this will cancel the shutdown and tell you about the cancellation using a message box.
-
-## Logging and Privacy
-
-The application is **not connected to the internet** and does **not collect usage data**. If there is an internal exception it will save a stack trace and simple event log to the users desktop (since v1.2.0) and notify the user but it will not automatically share any data with anyone. If you are using the Microsoft Store release, then the Store will also monitor basic usage and crashes and (depending on your Windows privacy settings) share this data with Microsoft and me.
+MIT。版权归 **Lukas Langrock** 所有。完整条款见 [LICENSE](LICENSE)。

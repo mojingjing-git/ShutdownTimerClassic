@@ -103,7 +103,7 @@
             this.titleLabel.Name = "titleLabel";
             this.titleLabel.Size = new System.Drawing.Size(215, 31);
             this.titleLabel.TabIndex = 20;
-            this.titleLabel.Text = "Shutdown Timer";
+            this.titleLabel.Text = "定时关机助手";
             // 
             // titlebarPictureBox
             // 
@@ -123,7 +123,7 @@
             this.hoursLabel.Name = "hoursLabel";
             this.hoursLabel.Size = new System.Drawing.Size(35, 13);
             this.hoursLabel.TabIndex = 140;
-            this.hoursLabel.Text = "Hours";
+            this.hoursLabel.Text = "小时";
             // 
             // minutesLabel
             // 
@@ -132,7 +132,7 @@
             this.minutesLabel.Name = "minutesLabel";
             this.minutesLabel.Size = new System.Drawing.Size(44, 13);
             this.minutesLabel.TabIndex = 160;
-            this.minutesLabel.Text = "Minutes";
+            this.minutesLabel.Text = "分钟";
             // 
             // secondsLabel
             // 
@@ -141,7 +141,7 @@
             this.secondsLabel.Name = "secondsLabel";
             this.secondsLabel.Size = new System.Drawing.Size(49, 13);
             this.secondsLabel.TabIndex = 180;
-            this.secondsLabel.Text = "Seconds";
+            this.secondsLabel.Text = "秒";
             // 
             // timeGroupBox
             // 
@@ -160,7 +160,7 @@
             this.timeGroupBox.Size = new System.Drawing.Size(252, 107);
             this.timeGroupBox.TabIndex = 110;
             this.timeGroupBox.TabStop = false;
-            this.timeGroupBox.Text = "When to do it?";
+            this.timeGroupBox.Text = "何时执行？";
             // 
             // timeOfDayModeRadioButton
             // 
@@ -169,7 +169,7 @@
             this.timeOfDayModeRadioButton.Name = "timeOfDayModeRadioButton";
             this.timeOfDayModeRadioButton.Size = new System.Drawing.Size(137, 17);
             this.timeOfDayModeRadioButton.TabIndex = 130;
-            this.timeOfDayModeRadioButton.Text = "At a specific time of day";
+            this.timeOfDayModeRadioButton.Text = "在指定的时刻";
             this.timeOfDayModeRadioButton.UseVisualStyleBackColor = true;
             // 
             // countdownModeRadioButton
@@ -179,7 +179,7 @@
             this.countdownModeRadioButton.Name = "countdownModeRadioButton";
             this.countdownModeRadioButton.Size = new System.Drawing.Size(140, 17);
             this.countdownModeRadioButton.TabIndex = 120;
-            this.countdownModeRadioButton.Text = "After a specific timespan";
+            this.countdownModeRadioButton.Text = "在指定的时长后";
             this.countdownModeRadioButton.UseVisualStyleBackColor = true;
             // 
             // actionGroupBox
@@ -196,7 +196,7 @@
             this.actionGroupBox.Size = new System.Drawing.Size(252, 119);
             this.actionGroupBox.TabIndex = 50;
             this.actionGroupBox.TabStop = false;
-            this.actionGroupBox.Text = "What to do?";
+            this.actionGroupBox.Text = "执行什么动作？";
             // 
             // preventSleepCheckBox
             // 
@@ -207,7 +207,7 @@
             this.preventSleepCheckBox.Name = "preventSleepCheckBox";
             this.preventSleepCheckBox.Size = new System.Drawing.Size(190, 17);
             this.preventSleepCheckBox.TabIndex = 90;
-            this.preventSleepCheckBox.Text = "Prevent system from going to sleep";
+            this.preventSleepCheckBox.Text = "阻止系统进入睡眠";
             this.preventSleepCheckBox.UseVisualStyleBackColor = true;
             // 
             // gracefulCheckBox
@@ -217,7 +217,7 @@
             this.gracefulCheckBox.Name = "gracefulCheckBox";
             this.gracefulCheckBox.Size = new System.Drawing.Size(186, 17);
             this.gracefulCheckBox.TabIndex = 80;
-            this.gracefulCheckBox.Text = "Graceful (do not force close apps)";
+            this.gracefulCheckBox.Text = "安全关机（不强制关闭程序）";
             this.gracefulCheckBox.UseVisualStyleBackColor = true;
             // 
             // backgroundCheckBox
@@ -227,7 +227,7 @@
             this.backgroundCheckBox.Name = "backgroundCheckBox";
             this.backgroundCheckBox.Size = new System.Drawing.Size(117, 17);
             this.backgroundCheckBox.TabIndex = 100;
-            this.backgroundCheckBox.Text = "Run in background";
+            this.backgroundCheckBox.Text = "在后台运行";
             this.backgroundCheckBox.UseVisualStyleBackColor = true;
             // 
             // actionLabel
@@ -237,26 +237,18 @@
             this.actionLabel.Name = "actionLabel";
             this.actionLabel.Size = new System.Drawing.Size(87, 13);
             this.actionLabel.TabIndex = 60;
-            this.actionLabel.Text = "Select an action:";
+            this.actionLabel.Text = "选择动作：";
             // 
             // actionComboBox
             // 
             this.actionComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.actionComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.actionComboBox.FormattingEnabled = true;
-            this.actionComboBox.Items.AddRange(new object[] {
-            "Shutdown",
-            "Restart",
-            "Hibernate",
-            "Sleep",
-            "Logout",
-            "Lock",
-            "Custom Command"});
+            LocalizedCatalog.Fill(this.actionComboBox, LocalizedCatalog.PowerActions, "Shutdown");
             this.actionComboBox.Location = new System.Drawing.Point(99, 19);
             this.actionComboBox.Name = "actionComboBox";
             this.actionComboBox.Size = new System.Drawing.Size(147, 21);
             this.actionComboBox.TabIndex = 70;
-            this.actionComboBox.Text = "Shutdown";
             this.actionComboBox.TextChanged += new System.EventHandler(this.ActionComboBox_TextChanged);
             // 
             // startButton
@@ -264,12 +256,12 @@
             this.startButton.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.startButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.startButton.Font = new System.Drawing.Font("Microsoft YaHei UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.startButton.Location = new System.Drawing.Point(18, 305);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(252, 31);
             this.startButton.TabIndex = 10;
-            this.startButton.Text = "Start";
+            this.startButton.Text = "开始";
             this.startButton.UseVisualStyleBackColor = true;
             this.startButton.Click += new System.EventHandler(this.StartButton_Click);
             // 
@@ -289,7 +281,7 @@
             this.infoToolTip.InitialDelay = 500;
             this.infoToolTip.ReshowDelay = 100;
             this.infoToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Info;
-            this.infoToolTip.ToolTipTitle = "Help";
+            this.infoToolTip.ToolTipTitle = "帮助";
             // 
             // settingsButton
             // 
@@ -306,8 +298,8 @@
             // Menu
             // 
             this.AcceptButton = this.startButton;
-            this.AccessibleDescription = "The main window where you can choose the time and power action.";
-            this.AccessibleName = "Shutdown Timer";
+            this.AccessibleDescription = "主窗口：在此选择定时与电源动作。";
+            this.AccessibleName = "定时关机助手";
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 348);
@@ -325,7 +317,7 @@
             this.Name = "Menu";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Shutdown Timer";
+            this.Text = "定时关机助手";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Menu_FormClosing);
             this.Load += new System.EventHandler(this.Menu_Load);
             this.Shown += new System.EventHandler(this.Menu_Shown);

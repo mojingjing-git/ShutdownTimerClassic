@@ -19,8 +19,8 @@ namespace ShutdownTimer
             appLabel.Text += "_debug";
 #endif
 
-            // Prevent font-fallback and subsequent layout issues. This application is currently only in English and doesn't require display of non-Latin characters.
-            this.Font = new Font("Microsoft Sans Serif", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
+            // 使用微软雅黑以正确显示中文字符，避免字体回退导致的排版问题。
+            this.Font = new Font("Microsoft YaHei UI", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
 
             LoadSettings();
         }
@@ -54,13 +54,13 @@ namespace ShutdownTimer
         {
             // general controls
             rememberStateCheckBox.Checked = SettingsProvider.Settings.RememberLastState;
-            trayiconThemeComboBox.Text = SettingsProvider.Settings.TrayIconTheme;
+            LocalizedCatalog.SelectValue(trayiconThemeComboBox, SettingsProvider.Settings.TrayIconTheme);
             rememberLastScreenPositionUI.Checked = SettingsProvider.Settings.RememberLastScreenPositionUI;
             rememberLastScreenPositionCountdown.Checked = SettingsProvider.Settings.RememberLastScreenPositionCountdown;
             enableMultipleInstances.Checked = SettingsProvider.Settings.EnableMultipleInstances;
 
             // default timer
-            actionComboBox.Text = SettingsProvider.Settings.DefaultTimer.Action;
+            LocalizedCatalog.SelectValue(actionComboBox, SettingsProvider.Settings.DefaultTimer.Action);
             gracefulCheckBox.Checked = SettingsProvider.Settings.DefaultTimer.Graceful;
             preventSleepCheckBox.Checked = SettingsProvider.Settings.DefaultTimer.PreventSleep;
             backgroundCheckBox.Checked = SettingsProvider.Settings.DefaultTimer.Background;
@@ -88,7 +88,7 @@ namespace ShutdownTimer
         {
             // general controls
             SettingsProvider.Settings.RememberLastState = rememberStateCheckBox.Checked;
-            SettingsProvider.Settings.TrayIconTheme = trayiconThemeComboBox.Text;
+            SettingsProvider.Settings.TrayIconTheme = LocalizedCatalog.GetValue(trayiconThemeComboBox);
             SettingsProvider.Settings.RememberLastScreenPositionUI = rememberLastScreenPositionUI.Checked;
             SettingsProvider.Settings.RememberLastScreenPositionCountdown = rememberLastScreenPositionCountdown.Checked;
             SettingsProvider.Settings.EnableMultipleInstances = enableMultipleInstances.Checked;
@@ -96,7 +96,7 @@ namespace ShutdownTimer
             // default timer
             if (!SettingsProvider.Settings.RememberLastState)
             {
-                SettingsProvider.Settings.DefaultTimer.Action = actionComboBox.Text;
+                SettingsProvider.Settings.DefaultTimer.Action = LocalizedCatalog.GetValue(actionComboBox);
                 SettingsProvider.Settings.DefaultTimer.Graceful = gracefulCheckBox.Checked;
                 SettingsProvider.Settings.DefaultTimer.PreventSleep = preventSleepCheckBox.Checked;
                 SettingsProvider.Settings.DefaultTimer.Background = backgroundCheckBox.Checked;
@@ -211,7 +211,7 @@ namespace ShutdownTimer
                 // ensure user understands implications from this action
                 if (hideTrayIconCheckBox.Focused)
                 {
-                    DialogResult result = MessageBox.Show("Disabling the tray icon will prevent you from interacting with the application when it's running in the background.\nYour only choice in such a case is to kill the application with Task Manager.\n\nNotifications will also stop working!\n\nAre you sure you want to enable this option?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    DialogResult result = MessageBox.Show("禁用托盘图标后，程序在后台运行时将无法与其交互。\n遇到这种情况你只能用任务管理器强制结束程序。\n\n通知功能也会随之失效！\n\n确定要启用该选项吗？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (result != DialogResult.Yes)
                     {
                         hideTrayIconCheckBox.Checked = false;

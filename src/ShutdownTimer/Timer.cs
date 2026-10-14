@@ -202,7 +202,7 @@ namespace ShutdownTimer
                         ExceptionHandler.Log("Failed to start custom command process");
                         ExceptionHandler.Log("Custom command: " + Command);
                         ExceptionHandler.Log("Exception: " + ex.ToString());
-                        MessageBox.Show("There was an error executing your custom command.\n\nYour custom command: " + Command + "\nError: " + ex.Message, "Countdown Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("执行自定义命令时出错。\n\n自定义命令：" + Command + "\n错误：" + ex.Message, "倒计时更新", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     break;
 

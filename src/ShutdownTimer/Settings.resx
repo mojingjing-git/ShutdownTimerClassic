@@ -118,15 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="aboutRichTextBox.Text" xml:space="preserve">
-    <value>This app is a free open-source project by Lukas Langrock under the MIT license which means there is no warranty provided and I shall not be held liable for any kind of damage!
-After all you may lose unsaved work or mess up another running application. Use this with caution and common sense!
+    <value>本应用是 Lukas Langrock 开发的免费开源项目，采用 MIT 许可协议发布。
+这意味着本程序不提供任何担保，作者不对任何形式的损失承担责任！
+请注意：你可能会丢失未保存的工作，或干扰其它正在运行的程序。
+请谨慎使用，并保持理性判断！
 
-The application is built to be reliable and should accurately measure and count time. I can't exactly guarantee this but I aim to get the application to be as stable and polished as possible.
-In the case you encounter an error or notice the application not working as it should, an issue on GitHub or an Email would be very appreciated so I can fix the mistake.
+本程序力求可靠，倒计时应当准确无误。我无法作出绝对保证，但目标是让它尽可能稳定、完善。
+如果你遇到错误，或发现程序运行异常，欢迎在 GitHub 提交 issue 或发邮件给我，以便我修复问题。
 
-If you enjoy using this free app, please consider writing a review on the Microsoft Store or starring the project on GitHub.
-Any contributions in the form of issues and PR's are very welcome. If you don't have a GitHub account, you can also write me an Email.
-</value>
+如果你喜欢这个免费应用，欢迎到 Microsoft Store 写条评价，或在 GitHub 上点个 star。
+也欢迎以 issue 和 PR 的形式参与贡献。如果你没有 GitHub 账号，也可以直接发邮件给我。</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

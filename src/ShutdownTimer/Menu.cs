@@ -43,7 +43,7 @@ namespace ShutdownTimer
                 ExceptionHandler.Log("Checking for running instance");
                 if (!ApplicationInstanceManager.IsSingleInstance())
                 {
-                    MessageBox.Show("Another instance of this application is already running. To allow multiple instances, please check the \"Allow multiple instances\" option in the application settings.\n\nExiting...", "Application already running!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("本程序已在运行。若要允许多开，请在应用设置中勾选“允许多开”选项。\n\n即将退出……", "程序已在运行！", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     ExceptionHandler.Log("Another instance detected; exiting");
                     Application.Exit();
                 }
@@ -60,17 +60,14 @@ namespace ShutdownTimer
             versionLabel.Text += "_debug";
 #endif
 
-            infoToolTip.SetToolTip(gracefulCheckBox, "Applications that do not exit when prompted automatically get terminated by default to ensure a successful shutdown." +
-                "\n\nA graceful shutdown, on the other hand, will wait for all applications to exit before continuing with the shutdown." +
-                "\nThis might result in an unsuccessful shutdown if one or more applications are unresponsive or require a user interaction to exit.");
-            infoToolTip.SetToolTip(preventSleepCheckBox, "Depending on the power settings of your system, it might go to sleep after a certain amount of time due to inactivity." +
-                "\nThis option will keep the system awake to ensure the timer can properly run and execute a shutdown.");
-            infoToolTip.SetToolTip(backgroundCheckBox, "This will launch the countdown without a visible window but will show a tray icon in your taskbar.");
-            infoToolTip.SetToolTip(countdownModeRadioButton, "Will count down from the hours, minutes and seconds selected below,\nlike a countdown timer, and execute the power action when it reaches zero.");
-            infoToolTip.SetToolTip(timeOfDayModeRadioButton, "In this mode you can select the target time of day (24h clock) for the power action.\nIf the time has already passed, it will roll over to tomorrow.\n\nWhen you press start, the appropriate countdown will be calculated.\n");
+            infoToolTip.SetToolTip(gracefulCheckBox, "默认情况下，未响应关闭提示的程序会被强制结束，以确保关机顺利完成。\n\n而“安全关机”会等待所有程序自行退出后再继续关机。\n如果某个程序无响应，或需要用户交互才能退出，可能会导致关机失败。");
+            infoToolTip.SetToolTip(preventSleepCheckBox, "根据系统的电源设置，一段时间无操作后电脑可能会自动进入睡眠。\n启用此选项可让系统保持唤醒，确保计时器能正常运行并准时执行动作。");
+            infoToolTip.SetToolTip(backgroundCheckBox, "启动倒计时后不显示窗口，仅在任务栏托盘显示一个图标。");
+            infoToolTip.SetToolTip(countdownModeRadioButton, "从下方设置的时、分、秒开始倒数，\n就像普通计时器一样，归零后执行所选动作。");
+            infoToolTip.SetToolTip(timeOfDayModeRadioButton, "在此模式下可选择目标时刻（24 小时制）。\n若该时刻已过，将自动顺延至次日。\n\n点击开始后，程序会据此计算倒计时时长。\n");
 
-            // Prevent font-fallback and subsequent layout issues. This application is currently only in English and doesn't require display of non-Latin characters.
-            this.Font = new Font("Microsoft Sans Serif", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
+            // 使用微软雅黑以正确显示中文字符，避免字体回退导致的布局问题。
+            this.Font = new Font("Microsoft YaHei UI", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
 
             ExceptionHandler.Log("Form initialized");
         }
@@ -108,7 +105,8 @@ namespace ShutdownTimer
         private void ActionComboBox_TextChanged(object sender, EventArgs e)
         {
             // disables graceful checkbox for all modes which can not be executed gracefully / which always execute gracefully
-            if (actionComboBox.Text == "Shutdown" || actionComboBox.Text == "Restart" || actionComboBox.Text == "Logout") { gracefulCheckBox.Enabled = true; }
+            string selectedAction = LocalizedCatalog.GetValue(actionComboBox);
+            if (selectedAction == "Shutdown" || selectedAction == "Restart" || selectedAction == "Logout") { gracefulCheckBox.Enabled = true; }
             else { gracefulCheckBox.Enabled = false; }
         }
 
@@ -128,13 +126,13 @@ namespace ShutdownTimer
             if (!allChecksPassed)
             {
                 ExceptionHandler.Log("Start aborted: failing checks");
-                MessageBox.Show("The following error(s) occurred:\n\n" + listOfErrorsFound + "Please resolve the problem(s) and try again.", "There seems to be a problem!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("发生以下错误：\n\n" + listOfErrorsFound + "请解决上述问题后重试。", "似乎出现了问题！", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             if (!listOfWarningsFound.Equals(""))
             {
-                if (MessageBox.Show(listOfWarningsFound + "Do you wish to continue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes)
+                if (MessageBox.Show(listOfWarningsFound + "是否仍要继续？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes)
                 {
                     ExceptionHandler.Log("User didn't accept the warnings; aborting");
                     return;
@@ -145,14 +143,12 @@ namespace ShutdownTimer
             {
                 command = ArgCommand;
             }
-            else if (actionComboBox.Text.Equals("Custom Command"))
+            else if (LocalizedCatalog.GetValue(actionComboBox) == "Custom Command")
             {
                 ExceptionHandler.Log("Custom command requested");
                 using (var form = new InputBox())
                 {
-                    form.Title = "Custom Command";
-                    form.Message = "Please enter the command you want to have executed. If you wish to launch a file, just enter the full file path.\n\n" +
-                        "Note: Execution will use this user's permissions.";
+                    form.Title = "自定义命令";
 
                     ExceptionHandler.Log("Prompting for custom command");
                     var result = form.ShowDialog();
@@ -166,7 +162,7 @@ namespace ShutdownTimer
                     if (String.IsNullOrWhiteSpace(form.ReturnValue))
                     {
                         ExceptionHandler.Log("Invalid custom command input; aborting");
-                        MessageBox.Show("Custom command field was empty. Please enter a valid command or use a different action!", "Invalid command!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("自定义命令不能为空。请输入有效命令，或改用其它动作！", "无效命令！", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -184,9 +180,7 @@ namespace ShutdownTimer
                 ExceptionHandler.Log("Password protection enabled");
                 using (var form = new InputBox())
                 {
-                    form.Title = "Password Protection";
-                    form.Message = "Please set a password to enable password protection.\n\n" +
-                        "You can disable this dialog in the settings under Advanced > Password Protection.";
+                    form.Title = "密码保护";
                     form.PasswordMode = true;
                     ExceptionHandler.Log("Prompting for password");
                     if (form.ShowDialog() == DialogResult.OK)
@@ -218,15 +212,15 @@ namespace ShutdownTimer
             string warnMessages = ""; // warning messages will append to this
 
             // Check if chosen action is a valid option
-            if (!actionComboBox.Items.Contains(actionComboBox.Text))
+            if (actionComboBox.SelectedItem == null)
             {
-                errMessages += "Please select a valid action from the dropdown menu!\n\n";
+                errMessages += "请从下拉菜单中选择一个有效动作！\n\n";
             }
 
             // Check if all time values are zero when in countdown mode
             if (hoursNumericUpDown.Value == 0 && minutesNumericUpDown.Value == 0 && secondsNumericUpDown.Value == 0 && countdownModeRadioButton.Checked)
             {
-                errMessages += "The timer cannot start at 0 when in countdown mode!\n\n";
+                errMessages += "倒计时模式下，计时不能从 0 开始！\n\n";
             }
 
             // Respective check for either countdown or timeOfDay mode
@@ -238,8 +232,8 @@ namespace ShutdownTimer
                 // Sanity check
                 if (ts.TotalDays > 100)
                 {
-                    warnMessages += $"Your chosen time equates to {Math.Round(ts.TotalDays)} days ({Math.Round(ts.TotalDays / 365, 2)} years)!\n" +
-                        "This is a bit much, and the application was never designed for this kind of runtime, so good luck!\n\n";
+                    warnMessages += $"你设置的时间相当于 {Math.Round(ts.TotalDays)} 天（约 {Math.Round(ts.TotalDays / 365, 2)} 年）！\n" +
+                        "这时间有点长，本程序从未针对如此长的运行时设计，祝你好运！\n\n";
                 }
 
                 // Check for time discontinuities when using timeOfDay mode
@@ -252,30 +246,31 @@ namespace ShutdownTimer
 
                     if (diff.TotalSeconds != 0)
                     {
-                        warnMessages += $"Your local clock will shift during this countdown! The actual time the countdown will end on diverges from your target by {Math.Abs(diff.TotalSeconds)} seconds, that's {Math.Abs(diff.TotalHours)} hour(s). This can be caused by daylight savings transition or other scheduled events in your local timezone.\n\n" +
-                            $"The countdown will use the difference between now and your target of {nowReference.Add(ts):HH:mm:ss}. " +
-                            $"However, your clock will display {actualEnd:HH:mm:ss} when the timer ends.\n\n" +
-                            $"The countdown will always use simple arithmetic instead of relying on timezone-aware calculation. Please be aware of this discrepancy!\n\n";
+                        warnMessages += $"倒计时期间你的本地时钟会发生跳变！实际结束时刻与你设定的目标相差 {Math.Abs(diff.TotalSeconds)} 秒，约合 {Math.Abs(diff.TotalHours)} 小时。这通常由夏令时切换或本地时区的其它时间调整事件引起。\n\n" +
+                            $"倒计时按当前时刻与你设定的 {nowReference.Add(ts):HH:mm:ss} 之差计算。" +
+                            $"但计时结束时，你的时钟会显示 {actualEnd:HH:mm:ss}。\n\n" +
+                            $"倒计时始终采用简单算术，而不会考虑时区规则，请留意这一差异！\n\n";
                     }
                 }
             }
             catch
             {
-                errMessages += "TimeSpan conversion failed! Please check if your time values are within a reasonable range or represent a valid time of day, if you used the time of day mode.\n\n";
+                errMessages += "时间跨度换算失败！请检查各时间值是否在合理范围内；如果你使用了定时模式，请确认所填时刻是否有效。\n\n";
             }
 
             // Check if we can get permissions forExitWindowsEx() (used for shutdown/reboot/logoff)
             try
             {
-                if (actionComboBox.Text.Contains("Shutdown") || actionComboBox.Text.Contains("Restart") || actionComboBox.Text.Contains("Logout"))
+                string permissionAction = LocalizedCatalog.GetValue(actionComboBox);
+                if (permissionAction == "Shutdown" || permissionAction == "Restart" || permissionAction == "Logout")
                 {
                     ExitWindows.GetPrivileges(); // throws on error
                 }
             }
             catch (Win32Exception ex)
             {
-                errMessages += "Permission failure. Couldn't enable the required privliges for Shutdown/Restart/Logout from Windows. Error: " + ex.Message + "\n\n";
-                errMessages += "To learn more about this issue, please go the application's settings and in the \"About\"-tab, click on \"Create Logfile\".";
+                errMessages += "权限不足，无法向 Windows 申请关机/重启/注销所需的权限。错误信息：" + ex.Message + "\n\n";
+                errMessages += "如需了解此问题的详细信息，请进入应用设置页面，在“关于”选项卡中点击“创建日志文件”。";
             }
 
             if (errMessages.Equals(""))
@@ -296,7 +291,7 @@ namespace ShutdownTimer
         /// </summary>
         private void LoadArgs()
         {
-            actionComboBox.Text = ArgAction;
+            LocalizedCatalog.SelectValue(actionComboBox, ArgAction);
             gracefulCheckBox.Checked = ArgGraceful;
             preventSleepCheckBox.Checked = ArgPreventSleep;
             backgroundCheckBox.Checked = ArgBackground;
@@ -309,7 +304,7 @@ namespace ShutdownTimer
             if (ArgMode.Equals("Lock"))
             {
                 ExceptionHandler.Log("Setting 'Lock' mode");
-                startButton.Text = "Start (with recommended settings)";
+                startButton.Text = "开始（使用推荐设置）";
                 settingsButton.Enabled = false;
                 actionGroupBox.Enabled = false;
                 timeGroupBox.Enabled = false;
@@ -321,7 +316,7 @@ namespace ShutdownTimer
         /// </summary>
         private void LoadSettings()
         {
-            actionComboBox.Text = SettingsProvider.Settings.DefaultTimer.Action;
+            LocalizedCatalog.SelectValue(actionComboBox, SettingsProvider.Settings.DefaultTimer.Action);
             gracefulCheckBox.Checked = SettingsProvider.Settings.DefaultTimer.Graceful;
             preventSleepCheckBox.Checked = SettingsProvider.Settings.DefaultTimer.PreventSleep;
             backgroundCheckBox.Checked = SettingsProvider.Settings.DefaultTimer.Background;
@@ -351,7 +346,7 @@ namespace ShutdownTimer
 
                 if (SettingsProvider.Settings.RememberLastState)
                 {
-                    SettingsProvider.Settings.DefaultTimer.Action = actionComboBox.Text;
+                    SettingsProvider.Settings.DefaultTimer.Action = LocalizedCatalog.GetValue(actionComboBox);
                     SettingsProvider.Settings.DefaultTimer.Graceful = gracefulCheckBox.Checked;
                     SettingsProvider.Settings.DefaultTimer.PreventSleep = preventSleepCheckBox.Checked;
                     SettingsProvider.Settings.DefaultTimer.Background = backgroundCheckBox.Checked;
@@ -401,7 +396,7 @@ namespace ShutdownTimer
             TimeSpan timeSpan = Time.CalculateCountdownTimeSpan(hoursNumericUpDown.Value, minutesNumericUpDown.Value, secondsNumericUpDown.Value, timeOfDayModeRadioButton.Checked, DateTime.Now);
 
             Timer.CountdownTimeSpan = timeSpan;
-            Timer.Action = actionComboBox.Text;
+            Timer.Action = LocalizedCatalog.GetValue(actionComboBox);
             Timer.Graceful = gracefulCheckBox.Checked;
             Timer.PreventSystemSleep = preventSleepCheckBox.Checked;
             Timer.Command = command;
