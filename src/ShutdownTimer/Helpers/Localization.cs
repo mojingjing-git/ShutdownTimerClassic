@@ -112,8 +112,13 @@ namespace ShutdownTimer.Helpers
                     // 用构造来探测：字体不存在时 GDI+ 会抛 ArgumentException。
                     // 不要用 new Font(name).FontFamily.Name 读回来比对，那样读到的是回退后的族名，
                     // 会把"字体缺失"误判成"字体可用"。
-                    FontFamily family = new FontFamily(name);
-                    return new Font(family, 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
+                    // FontFamily 也实现了 IDisposable，探测完必须释放。
+                    // new Font(...) 在构造时就复制了字体信息，不持有 family，
+                    // 所以可以立即 Dispose，不必等到方法返回。
+                    using (FontFamily family = new FontFamily(name))
+                    {
+                        return new Font(family, 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
+                    }
                 }
                 catch (ArgumentException)
                 {
@@ -213,6 +218,10 @@ namespace ShutdownTimer.Helpers
         /// 「每次点开都 new 一个」——不做缓存的话，每次开关设置窗都会为 titleLabel / footerLabel
         /// 各 new 一个 GDI Font 对象且永不释放，长期使用会累积句柄。
         /// 缓存的 Font 被多个控件共享是安全的：控件不负责 Dispose 赋给它的 Font。
+        /// <br />
+        /// 并发约束：<c>TryGetValue</c> + 写入不是原子操作，本类<b>只允许在 UI 线程调用</b>
+        /// （四个窗体的 Load 都在 UI 线程）。将来若要做运行期热切换语言而引入多线程调用，
+        /// 必须换成 <c>ConcurrentDictionary</c>，否则可能多建一份 Font 漏掉缓存、或并发写坏字典。
         /// </summary>
         private static readonly Dictionary<string, Font> derivedCache = new Dictionary<string, Font>(StringComparer.Ordinal);
 

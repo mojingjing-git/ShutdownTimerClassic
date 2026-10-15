@@ -13,8 +13,9 @@ namespace ShutdownTimer.Helpers
     ///     这样 key 和 <see cref="Timer.ExecutePowerAction"/> 的 switch case、settings.json 的
     ///     持久化值、命令行 <c>/SetAction</c> 参数天然对齐，不会随翻译而漂移。
     ///   * 查不到 key 时原样返回 key 本身，绝不抛异常：漏翻译最坏只是显示英文，不会让程序崩掉。
-    ///   * 本轮（搭骨架）只登记了 <see cref="LocalizedCatalog"/> 里的 10 条 Display
-    ///     （7 个电源动作 + 3 个托盘图标主题）。业务文案是下一步的事，暂时不要往这里塞。
+    ///   * 起步时只登记了 <see cref="LocalizedCatalog"/> 里的 10 条 Display（7 个电源动作 +
+    ///     3 个托盘图标主题）；后续已把 7 个业务窗体与三个 Designer 的界面文案全部并入，
+    ///     现有 <b>147</b> 条。新增界面文案一律登记到这里，不要再散回各个 .cs 硬编码。
     /// </summary>
     internal static class Strings
     {
@@ -101,6 +102,11 @@ namespace ShutdownTimer.Helpers
             { "Another instance of this application is already running. To allow multiple instances, please check the \"Allow multiple instances\" option in the application settings.\n\nExiting... (Main menu)", "本程序已在运行。若要允许多开，请在应用设置中勾选“允许多开”选项。\n\n即将退出……" },
 
             // ===== 崩溃提示 =====
+            // 注意：这条 key 不是上游英文原文。汉化时中文硬编码删掉了上游的
+            // "A log file … saved to your desktop." 整句，也没保留末尾的 Email 行，
+            // 并把仓库链接指向了本 fork。key 现状与既有中文一一对应，保证界面零变化；
+            // 代价是将来若真加英文语言，fallback 出来的英文会比上游多一句、少一个 Email 行。
+            // 到那一步以本 key 为准重新对齐上游原文即可，不影响中文版。
             { "The application ran into a critical error, leaving it in an unrecoverable state. As reliable operation can no longer be guaranteed, it will be terminated.\n\nA log file containing information about the process and the error has been saved to your desktop.\nPlease create an issue on GitHub and include the contents of this log file to help identify and fix the issue.\n\nGitHub: github.com/lukaslangrock/ShutdownTimerClassic/issues\nEmail: lukas.langrock@outlook.de", "程序遇到严重错误，已处于无法恢复的状态。由于无法再保证可靠运行，程序将被终止。\n\n包含进程信息与错误详情的日志文件已保存到你的桌面。\n请在 GitHub 上提交 issue，并附上该日志文件的内容，以便定位和修复问题。\n\nGitHub：github.com/mojingjing-git/ShutdownTimerClassic/issues" },
 
             // ===== Menu.cs 提示条（换行符必须与 key 完全一致）=====
@@ -114,6 +120,9 @@ namespace ShutdownTimer.Helpers
             // 这些 key 的 Args 一律传原始值（DateTimeOffset / double），
             // 格式说明写在 key 里，换行符必须与 key 完全一致。
             // "Warning" 已在上面的对话框标题一节登记，这里不重复。
+            // B3、B6 两条的 key 去掉了上游字面量尾部的 "\n\n"：段落分隔改由 Menu.Render()
+            // 的 string.Join("\n\n") 统一负责，key 里再带一份就会多出空行。中文路径已验证等价；
+            // 副作用是若 T() 将来回退到英文 key 显示，这两条会少一个段落间距。
 
             // ---------- 错误框的页眉 / 页脚 / 标题 ----------
             { "The following error(s) occurred:\n\n",                "发生以下错误：\n\n" },
@@ -245,6 +254,28 @@ namespace ShutdownTimer.Helpers
             { "OK", "确定" },
             { "Cancel", "取消" }
         };
+
+        /// <summary>
+        /// 取指定 key 的文案，<b>不做任何格式化</b>。
+        /// </summary>
+        /// <remarks>
+        /// 这个重载不是冗余，它是决策 A 那条防护真正落地的地方。
+        /// <c>params object[]</c> 有个反直觉的语义：只传一个字符串实参（如 <c>T("a {0}")</c>）时，
+        /// 编译器会把它包成<b>长度 1</b> 的 <c>object[]</c>，于是下面那个重载里的
+        /// <c>args.Length == 0</c> 判断<b>永远不成立</b>，无参调用照样会进
+        /// <see cref="string.Format(string, object[])"/>——而原文含花括号时会抛
+        /// <see cref="System.FormatException"/>，正是决策 A 要防的那种崩法。
+        /// <br />
+        /// 有了本重载，无参调用精确匹配到这里，永远走不到 <see cref="string.Format"/>。
+        /// 对不含占位符的 key 结果完全一致（<c>string.Format</c> 本就恒等），属于纯粹的修正。
+        /// </remarks>
+        /// <param name="key">英文原文键；查不到时原样返回。</param>
+        public static string T(string key)
+        {
+            string t;
+            if (!zhHans.TryGetValue(key, out t)) { t = key; WarnMissing(key); }
+            return t;
+        }
 
         /// <summary>
         /// 取指定 key 的文案，必要时按 <paramref name="args"/> 做格式化。

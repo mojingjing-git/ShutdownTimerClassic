@@ -36,6 +36,9 @@ namespace ShutdownTimer
             // 按当前语言统一应用字体，替换掉 Designer 里硬编码的微软雅黑。
             Localization.ApplyTo(this);
 
+            // 必须排在 ApplyTo 之后：按钮宽度随字体变，量到的必须是最终渲染宽度。
+            ReflowAboutButtons();
+
             LoadSettings();
         }
 
@@ -113,8 +116,6 @@ namespace ShutdownTimer
             faInfoLabel.Text = Strings.T("Font Awesome:");
             faLicenseLinkLabel.Text = Strings.T("CC BY 4.0 License");
             faSourceLinkLabel.Text = Strings.T("Sourcecode");
-
-            ReflowAboutButtons();
         }
 
         /// <summary>
@@ -132,6 +133,10 @@ namespace ShutdownTimer
         ///
         /// 所以这里按顺序重排 <c>Left</c>，保持统一的间隙，从第一个按钮的原位开始，
         /// 这样改动最小，也不会把整行推出 <c>aboutGroupBox</c>。
+        /// <br />
+        /// <b>调用时序：必须排在 <c>Localization.ApplyTo(this)</c> 之后。</b>按钮宽度取决于字体，
+        /// 而这三个按钮都没有显式设 <c>Font</c>（走 <c>Form.Font</c> 传播，Designer 里也没设
+        /// <c>this.Font</c>），所以在换字体之前量到的宽度并非最终宽度，排出的间隙也是按旧字体算的。
         /// </summary>
         private void ReflowAboutButtons()
         {

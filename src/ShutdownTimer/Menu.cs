@@ -273,8 +273,13 @@ namespace ShutdownTimer
         /// <br />
         /// 原因：B5 触发时倒计时的目标时刻根本没算出来。若它只是警告，用户会看到一个「是否仍要继续？」
         /// 警告框，点「是」就带着一个算不出来的时间跨度直接进入倒计时并执行关机动作——
-        /// 从「明确报错」退化成「静默错误」，可能直接关机。这是本次改造里唯一能出人命的约束，
-        /// 因此下方 <see cref="RunChecks"/> 里对它加了 <see cref="Debug.Assert"/>。
+        /// 从「明确报错」退化成「静默错误」，可能直接关机。这是本次改造里唯一能出人命的约束。
+        /// <br />
+        /// <b>防线（按强度排序）：</b>① 该 Issue 必须经 <see cref="Issue.Blocking"/> 产生——
+        /// 它把 Severity 硬编码成 Error，而 <see cref="Issue.Severity"/> 是只读属性，
+        /// 「把它改成 Warning」在语言层面就写不出来，且与构建配置无关，Release 下同样生效；
+        /// ② <see cref="RunChecks"/> 末尾还有一条 <see cref="Debug.Assert"/> 二次校验，但注意它走
+        /// <c>[Conditional("DEBUG")]</c>，Release 编译时被整段剔除，<b>只能当辅助，不能当唯一防线</b>。
         /// </remarks>
         private const string KeyTimeSpanConversionFailed = "TimeSpan conversion failed! Please check if your time values are within a reasonable range or represent a valid time of day, if you used the time of day mode.";
 
@@ -299,21 +304,13 @@ namespace ShutdownTimer
             // Check if chosen action is a valid option
             if (actionComboBox.SelectedItem == null)
             {
-                result.Issues.Add(new Issue
-                {
-                    Key = "Please select a valid action from the dropdown menu!",
-                    Severity = IssueSeverity.Error
-                });
+                result.Issues.Add(Issue.Blocking("Please select a valid action from the dropdown menu!"));
             }
 
             // Check if all time values are zero when in countdown mode
             if (hoursNumericUpDown.Value == 0 && minutesNumericUpDown.Value == 0 && secondsNumericUpDown.Value == 0 && countdownModeRadioButton.Checked)
             {
-                result.Issues.Add(new Issue
-                {
-                    Key = "The timer cannot start at 0 when in countdown mode!",
-                    Severity = IssueSeverity.Error
-                });
+                result.Issues.Add(Issue.Blocking("The timer cannot start at 0 when in countdown mode!"));
             }
 
             // Respective check for either countdown or timeOfDay mode
@@ -326,12 +323,9 @@ namespace ShutdownTimer
                 if (ts.TotalDays > 100)
                 {
                     // 传原始 double（保留几位小数由译文决定），不要传 Math.Round 之后插值好的字符串。
-                    result.Issues.Add(new Issue
-                    {
-                        Args = new object[] { Math.Round(ts.TotalDays), Math.Round(ts.TotalDays / 365, 2) },
-                        Key = "Your chosen time equates to {0} days ({1} years)!\nThis is a bit much, and the application was never designed for this kind of runtime, so good luck!",
-                        Severity = IssueSeverity.Warning
-                    });
+                    result.Issues.Add(Issue.Advisory(
+                        "Your chosen time equates to {0} days ({1} years)!\nThis is a bit much, and the application was never designed for this kind of runtime, so good luck!",
+                        Math.Round(ts.TotalDays), Math.Round(ts.TotalDays / 365, 2)));
                 }
 
                 // Check for time discontinuities when using timeOfDay mode
@@ -347,29 +341,17 @@ namespace ShutdownTimer
                         // 原本是一整段中文，拆成 4 条：每条一个语义单元，译者才能调整语序。
                         // Args 一律传原始值：秒/小时传 double，时刻传 DateTimeOffset，
                         // 格式说明（{0:HH:mm:ss}）写进 key，绝不在这里预先插值。
-                        result.Issues.Add(new Issue
-                        {
-                            Args = new object[] { Math.Abs(diff.TotalSeconds), Math.Abs(diff.TotalHours) },
-                            Key = "Your local clock will shift during this countdown! The actual time the countdown will end on diverges from your target by {0} seconds, that's {1} hour(s). This can be caused by daylight savings transition or other scheduled events in your local timezone.",
-                            Severity = IssueSeverity.Warning
-                        });
-                        result.Issues.Add(new Issue
-                        {
-                            Args = new object[] { nowReference.Add(ts) },
-                            Key = "The countdown will use the difference between now and your target of {0:HH:mm:ss}.",
-                            Severity = IssueSeverity.Warning
-                        });
-                        result.Issues.Add(new Issue
-                        {
-                            Args = new object[] { actualEnd },
-                            Key = "However, your clock will display {0:HH:mm:ss} when the timer ends.",
-                            Severity = IssueSeverity.Warning
-                        });
-                        result.Issues.Add(new Issue
-                        {
-                            Key = "The countdown will always use simple arithmetic instead of relying on timezone-aware calculation. Please be aware of this discrepancy!",
-                            Severity = IssueSeverity.Warning
-                        });
+                        result.Issues.Add(Issue.Advisory(
+                            "Your local clock will shift during this countdown! The actual time the countdown will end on diverges from your target by {0} seconds, that's {1} hour(s). This can be caused by daylight savings transition or other scheduled events in your local timezone.",
+                            Math.Abs(diff.TotalSeconds), Math.Abs(diff.TotalHours)));
+                        result.Issues.Add(Issue.Advisory(
+                            "The countdown will use the difference between now and your target of {0:HH:mm:ss}.",
+                            nowReference.Add(ts)));
+                        result.Issues.Add(Issue.Advisory(
+                            "However, your clock will display {0:HH:mm:ss} when the timer ends.",
+                            actualEnd));
+                        result.Issues.Add(Issue.Advisory(
+                            "The countdown will always use simple arithmetic instead of relying on timezone-aware calculation. Please be aware of this discrepancy!"));
                     }
                 }
             }
@@ -377,11 +359,8 @@ namespace ShutdownTimer
             {
                 ExceptionHandler.Log("TimeSpan conversion check failed: " + ex.GetType().Name + ": " + ex.Message);
                 // 安全约束：见 KeyTimeSpanConversionFailed 的注释——必须是 Error。
-                result.Issues.Add(new Issue
-                {
-                    Key = KeyTimeSpanConversionFailed,
-                    Severity = IssueSeverity.Error
-                });
+                // 必须走 Blocking 工厂：Severity 构造后不可变，这条防线在 Release 下同样生效。
+                result.Issues.Add(Issue.Blocking(KeyTimeSpanConversionFailed));
             }
 
             // Check if we can get permissions forExitWindowsEx() (used for shutdown/reboot/logoff)
@@ -397,19 +376,15 @@ namespace ShutdownTimer
             {
                 // 拆成两条独立 Issue：上游靠第一条自带的 "\n\n" 把第二条顶下去，
                 // 那条换行在旧的中文硬编码里已经丢了，会让两句话连成一行。
-                result.Issues.Add(new Issue
-                {
-                    Args = new object[] { ex.Message },
-                    Key = "Permission failure. Couldn't enable the required privliges for Shutdown/Restart/Logout from Windows. Error: {0}",
-                    Severity = IssueSeverity.Error
-                });
-                result.Issues.Add(new Issue
-                {
-                    Key = "To learn more about this issue, please go the application's settings and in the \"About\"-tab, click on \"Create Logfile\".",
-                    Severity = IssueSeverity.Error
-                });
+                result.Issues.Add(Issue.Blocking(
+                    "Permission failure. Couldn't enable the required privliges for Shutdown/Restart/Logout from Windows. Error: {0}",
+                    ex.Message));
+                result.Issues.Add(Issue.Blocking(
+                    "To learn more about this issue, please go the application's settings and in the \"About\"-tab, click on \"Create Logfile\"."));
             }
 
+            // 开发期二次校验。注意 Debug.Assert 走 [Conditional("DEBUG")]，Release 下整段消失，
+            // 它挡不住任何东西——B5 真正靠得住的防线是 Issue.Blocking + Issue.Severity 只读属性。
             Debug.Assert(
                 result.Issues.Where(i => i.Key == KeyTimeSpanConversionFailed).All(i => i.Severity == IssueSeverity.Error),
                 "B5 (TimeSpan conversion failed) must stay IssueSeverity.Error: the target time could not be computed, and a Warning would let the user confirm and shut the machine down anyway.");
@@ -572,14 +547,66 @@ namespace ShutdownTimer
     internal sealed class Issue
     {
         /// <summary>英文原文键，交由 <see cref="Strings.T(string, object[])"/> 查表。</summary>
-        public string Key { get; set; }
+        public string Key { get; private set; }
 
         /// <summary>
         /// 格式化参数，<b>必须传原始值</b>（DateTimeOffset / double 等），不要传插值好的字符串：
         /// 格式说明（如 <c>{0:HH:mm:ss}</c>）写在 <see cref="Key"/> 里，由译文决定怎么排版。
         /// </summary>
-        public object[] Args { get; set; }
+        public object[] Args { get; private set; }
 
-        public IssueSeverity Severity { get; set; }
+        /// <summary>
+        /// 严重级。<b>构造后不可变</b>——只能经 <see cref="Blocking"/> 或 <see cref="Advisory"/> 产生。
+        /// </summary>
+        /// <remarks>
+        /// 这里刻意不给 setter：属性可写时，「把某条阻断项误改成 Warning」只是一次看似无害的编辑，
+        /// 而对 B5 来说它等于让用户点「是」就带着算不出来的时间跨度直接关机。
+        /// 做成只读 + 工厂后，这种误改在语言层面就无从写起，且与构建配置无关——
+        /// <c>Debug.Assert</c> 受 <c>[Conditional("DEBUG")]</c> 影响，Release 下会被整段剔除，
+        /// 拿它当唯一防线是假的。
+        /// </remarks>
+        public IssueSeverity Severity { get; private set; }
+
+        private Issue(string key, IssueSeverity severity, object[] args)
+        {
+            Key = key;
+            Severity = severity;
+            Args = args;
+        }
+
+        /// <summary>
+        /// 阻断级：只要存在一条，<see cref="CheckResult.AllChecksPassed"/> 即为 false，
+        /// 用户无法点「仍然继续」绕过。
+        /// </summary>
+        /// <remarks>
+        /// 下面这个重载不是冗余：<c>params</c> 在只传一个字符串实参时会把该字符串
+        /// 包成长度 1 的 <c>object[]</c>，使「无参」调用看起来带了 1 个参数。
+        /// 本重载保证 <see cref="Args"/> 为 null，语义才是真的「无参」。
+        /// </remarks>
+        public static Issue Blocking(string key)
+        {
+            return new Issue(key, IssueSeverity.Error, null);
+        }
+
+        /// <summary>阻断级（带格式化参数）。</summary>
+        public static Issue Blocking(string key, params object[] args)
+        {
+            return new Issue(key, IssueSeverity.Error, args);
+        }
+
+        /// <summary>
+        /// 警告级：用户点「是」即可继续。仅用于「结果仍然可信，只是值得提醒」的情况。
+        /// </summary>
+        /// <remarks>无参重载的存在理由同 <see cref="Blocking(string)"/>。</remarks>
+        public static Issue Advisory(string key)
+        {
+            return new Issue(key, IssueSeverity.Warning, null);
+        }
+
+        /// <summary>警告级（带格式化参数）。</summary>
+        public static Issue Advisory(string key, params object[] args)
+        {
+            return new Issue(key, IssueSeverity.Warning, args);
+        }
     }
 }
