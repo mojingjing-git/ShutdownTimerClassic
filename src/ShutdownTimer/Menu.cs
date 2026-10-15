@@ -173,8 +173,10 @@ namespace ShutdownTimer
             if (!checkResult.AllChecksPassed)
             {
                 ExceptionHandler.Log("Start aborted: failing checks");
+                // 结尾的 "\n\n" 同上：上游是靠最后一条错误自带的换行把页脚顶到下一段，
+                // 拆成独立 Issue 后那条换行没了，不补回来的话最后一条错误会和页脚连成一行。
                 MessageBox.Show(
-                    Strings.T("The following error(s) occurred:\n\n") + Render(checkResult, IssueSeverity.Error) + Strings.T("Please resolve the problem(s) and try again."),
+                    Strings.T("The following error(s) occurred:\n\n") + Render(checkResult, IssueSeverity.Error) + "\n\n" + Strings.T("Please resolve the problem(s) and try again."),
                     Strings.T("There seems to be a problem!"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
