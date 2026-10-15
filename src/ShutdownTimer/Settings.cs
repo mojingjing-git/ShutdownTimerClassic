@@ -8,6 +8,17 @@ namespace ShutdownTimer
 {
     public partial class Settings : Form
     {
+        /// <summary>
+        /// 语言刷新期间的抑制标志。
+        /// </summary>
+        /// <remarks>
+        /// <c>LocalizedCatalog.Fill</c> 会清空并重建 Items 再重新选中，于是
+        /// <see cref="LanguageComboBox_SelectedIndexChanged"/> 会被再次触发。
+        /// 不挡掉的话，刷新过程会递归重入，把用户刚选的语言又盖掉，
+        /// 表现为下拉框选了没反应或来回跳。
+        /// </remarks>
+        private bool suppressLanguageEvents;
+
         public Settings()
         {
             InitializeComponent();
@@ -15,6 +26,9 @@ namespace ShutdownTimer
 
         private void Settings_Load(object sender, EventArgs e)
         {
+            // 必须排在最前面：下面每一次 T() 查表都要用到当前语言。
+            Strings.CurrentLanguage = Localization.Parse(SettingsProvider.Settings.Language);
+
             // 下拉框必须排在下面的 LoadSettings() 之前：LoadSettings() 内部调 SelectValue()，
             // 而 SelectValue() 首行就是 if (box.Items.Count == 0) return;
             // 填晚了就会静默 no-op → 下拉框 0 项 → GetValue() 返回 box.Text = "" →
@@ -23,15 +37,27 @@ namespace ShutdownTimer
             // 就会被重新生成无声删除，所以必须搬到这里。
             LocalizedCatalog.Fill(actionComboBox, LocalizedCatalog.PowerActions(), "Shutdown");
             LocalizedCatalog.Fill(trayiconThemeComboBox, LocalizedCatalog.TrayIconThemes(), "Automatic");
+
+            // 语言下拉框同样必须先填：Fill() 里的 SelectValue() 同样依赖 Items 非空。
+            // 事件是在 InitializeComponent 里挂上的，所以这次初始化填充必然触发一次
+            // SelectedIndexChanged——不屏蔽就等于"刚启动就切一次语言"。
+            suppressLanguageEvents = true;
+            try
+            {
+                LocalizedCatalog.Fill(languageComboBox, LocalizedCatalog.Languages(), Strings.CurrentLanguage.ToString());
+            }
+            finally
+            {
+                suppressLanguageEvents = false;
+            }
+
             Debug.Assert(actionComboBox.Items.Count > 0, "actionComboBox 必须在 LoadSettings() 之前填充");
             Debug.Assert(trayiconThemeComboBox.Items.Count > 0, "trayiconThemeComboBox 必须在 LoadSettings() 之前填充");
+            Debug.Assert(languageComboBox.Items.Count > 0, "languageComboBox 必须在 LoadSettings() 之前填充");
 
             ApplyTexts();
 
-            appLabel.Text = Strings.T("Shutdown Timer Classic") + "@v" + Application.ProductVersion.Remove(Application.ProductVersion.LastIndexOf("."));
-#if DEBUG
-            appLabel.Text += "_debug";
-#endif
+            UpdateAppLabel();
 
             // 按当前语言统一应用字体，替换掉 Designer 里硬编码的微软雅黑。
             Localization.ApplyTo(this);
@@ -40,6 +66,17 @@ namespace ShutdownTimer
             ReflowAboutButtons();
 
             LoadSettings();
+        }
+
+        /// <summary>
+        /// 设置窗右上角那行「产品名@版本号」。语言切换后要跟着变，所以抽成方法。
+        /// </summary>
+        private void UpdateAppLabel()
+        {
+            appLabel.Text = Strings.T("Shutdown Timer Classic") + "@v" + Application.ProductVersion.Remove(Application.ProductVersion.LastIndexOf("."));
+#if DEBUG
+            appLabel.Text += "_debug";
+#endif
         }
 
         /// <summary>
@@ -63,6 +100,8 @@ namespace ShutdownTimer
 
             // 常规
             tabPage1.Text = Strings.T("General");
+            languageGroupBox.Text = Strings.T("Interface language");
+            languageLabel.Text = Strings.T("Language:");
             groupBox1.Text = Strings.T("Application behaviour");
             enableMultipleInstances.Text = Strings.T("Allow multiple instances");
             rememberLastScreenPositionCountdown.Text = Strings.T("Remember last screen position (Countdown)");
@@ -105,6 +144,8 @@ namespace ShutdownTimer
 
             // 关于
             tabPage3.Text = Strings.T("About");
+            // 这段原本在 Settings.resx 里，不经过查表，所以切语言时不会跟着变。
+            aboutRichTextBox.Text = Strings.AboutText();
             aboutGroupBox.Text = Strings.T("About this app");
             logButton.Text = Strings.T("Create Logfile");
             emailbutton.Text = Strings.T("Email");
@@ -151,6 +192,86 @@ namespace ShutdownTimer
             }
         }
 
+        /// <summary>
+        /// 语言下拉框：切换后立即刷新当前窗体，不需要重启。
+        /// </summary>
+        private void LanguageComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (suppressLanguageEvents)
+            {
+                return;
+            }
+
+            string selected = LocalizedCatalog.GetValue(languageComboBox);
+            if (string.IsNullOrEmpty(selected)
+                || string.Equals(selected, Strings.CurrentLanguage.ToString(), StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            Strings.CurrentLanguage = Localization.Parse(selected);
+
+            // 立刻落盘：万一用户切完语言直接结束进程，设置也不丢。
+            SettingsProvider.Settings.Language = selected;
+            SettingsProvider.Save();
+
+            ExceptionHandler.Log("Interface language changed to " + selected);
+
+            RefreshLanguage();
+        }
+
+        /// <summary>
+        /// 把当前窗体整体重刷成 <see cref="Strings.CurrentLanguage"/> 指定的语言。
+        /// </summary>
+        /// <remarks>
+        /// 顺序不能重排：先重建三个组合框（Display 是查表来的），再覆盖文案（文案变了
+        /// AutoSize 控件宽度才会变），再换字体，最后重排 About 页按钮——它量的必须是
+        /// 最终字体下的宽度。
+        /// <br />
+        /// 重建组合框前必须先把<b>英文值</b>取出来存好，否则 <c>SelectValue</c> 在新表里
+        /// 找不到匹配时会回落到第一项，等于用户选的动作被悄悄改掉。
+        /// <br />
+        /// 全程屏蔽事件：<c>Fill</c> 会重建 Items 并重新选中，会再次触发本窗体的
+        /// <c>SelectedIndexChanged</c>。
+        /// </remarks>
+        private void RefreshLanguage()
+        {
+            suppressLanguageEvents = true;
+            try
+            {
+                string action = LocalizedCatalog.GetValue(actionComboBox);
+                string theme = LocalizedCatalog.GetValue(trayiconThemeComboBox);
+                string lang = LocalizedCatalog.GetValue(languageComboBox);
+
+                LocalizedCatalog.Fill(actionComboBox, LocalizedCatalog.PowerActions(), action);
+                LocalizedCatalog.Fill(trayiconThemeComboBox, LocalizedCatalog.TrayIconThemes(), theme);
+                LocalizedCatalog.Fill(languageComboBox, LocalizedCatalog.Languages(), lang);
+
+                ApplyTexts();
+
+                UpdateAppLabel();
+
+                Localization.ApplyTo(this);
+
+                ReflowAboutButtons();
+
+                // 主界面也是打开着的窗体，一并刷新；否则设置窗变了语言，关掉它以后
+                // 用户眼前的主界面还停在旧语言，看起来像"设置没生效"。
+                foreach (Form open in Application.OpenForms)
+                {
+                    Menu menu = open as Menu;
+                    if (menu != null)
+                    {
+                        menu.RefreshLanguageUi();
+                    }
+                }
+            }
+            finally
+            {
+                suppressLanguageEvents = false;
+            }
+        }
+
         private void Settings_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveSettings();
@@ -181,6 +302,7 @@ namespace ShutdownTimer
             // general controls
             rememberStateCheckBox.Checked = SettingsProvider.Settings.RememberLastState;
             LocalizedCatalog.SelectValue(trayiconThemeComboBox, SettingsProvider.Settings.TrayIconTheme);
+            LocalizedCatalog.SelectValue(languageComboBox, SettingsProvider.Settings.Language);
             rememberLastScreenPositionUI.Checked = SettingsProvider.Settings.RememberLastScreenPositionUI;
             rememberLastScreenPositionCountdown.Checked = SettingsProvider.Settings.RememberLastScreenPositionCountdown;
             enableMultipleInstances.Checked = SettingsProvider.Settings.EnableMultipleInstances;
@@ -215,6 +337,7 @@ namespace ShutdownTimer
             // general controls
             SettingsProvider.Settings.RememberLastState = rememberStateCheckBox.Checked;
             SettingsProvider.Settings.TrayIconTheme = LocalizedCatalog.GetValue(trayiconThemeComboBox);
+            SettingsProvider.Settings.Language = LocalizedCatalog.GetValue(languageComboBox);
             SettingsProvider.Settings.RememberLastScreenPositionUI = rememberLastScreenPositionUI.Checked;
             SettingsProvider.Settings.RememberLastScreenPositionCountdown = rememberLastScreenPositionCountdown.Checked;
             SettingsProvider.Settings.EnableMultipleInstances = enableMultipleInstances.Checked;

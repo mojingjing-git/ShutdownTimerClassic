@@ -92,6 +92,28 @@ namespace ShutdownTimer
         }
 
         /// <summary>
+        /// 可选界面语言。<see cref="LocalizedItem.Value"/> 是 <see cref="Language"/> 的枚举名，
+        /// 即写进 <c>settings.json</c> 的持久化值；<see cref="LocalizedItem.Display"/> 固定用
+        /// 该语言自己的文字，<b>不查表</b>。
+        /// </summary>
+        /// <remarks>
+        /// 语言名刻意不做本地化：这个下拉框回答的是"有哪些语言可选"，不是"当前界面语言的翻译"。
+        /// 若跟着界面语言走，中文用户看到的「日本語」在切到英文后就会变成 "Japanese"，
+        /// 用户点两次就认不出自己之前选的是什么了。
+        /// <br />
+        /// 顺序即下拉框顺序。英文排第一是因为它是回落语言（不查表，永远可用）。
+        /// </remarks>
+        public static LocalizedItem[] Languages()
+        {
+            return new LocalizedItem[]
+            {
+                new LocalizedItem("English", "English"),
+                new LocalizedItem("ZhHans",   "简体中文"),
+                new LocalizedItem("Ja",       "日本語")
+            };
+        }
+
+        /// <summary>
         /// Fills a combo box with localized items and selects the entry matching
         /// <paramref name="defaultValue"/>. Falls back to the first entry if the value is
         /// unknown (for example a hand-edited or corrupt settings file).

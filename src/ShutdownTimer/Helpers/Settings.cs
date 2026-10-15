@@ -128,6 +128,14 @@ namespace ShutdownTimer.Helpers
                 Settings.TrayIconTheme = "Automatic";
             }
 
+            // 语言字段是后加的，老的 settings.json 里没有它。
+            // 除了空值，还要挡掉"认识不出来的名字"（手改文件 / 降级到旧版本再升回来）。
+            if (String.IsNullOrEmpty(Settings.Language) || !Localization.IsKnown(Settings.Language))
+            {
+                ExceptionHandler.Log("Language missing or unrecognized; initializing default");
+                Settings.Language = Localization.DefaultName;
+            }
+
             if (Settings.BackgroundColor.IsEmpty)
             {
                 ExceptionHandler.Log("BackgroundColor null or empty; initializing default");
@@ -135,6 +143,11 @@ namespace ShutdownTimer.Helpers
             }
 
             ExceptionHandler.Log("Settings validated");
+
+            // 界面语言在这里生效：CheckSettings 刚把缺失/不认识的值纠正成默认，
+            // 而 Parse 对任何垃圾输入都只回落、不抛异常，所以放在这里最稳。
+            // 必须早于任何 T() 调用——各窗体的 ApplyTexts() 都在自己的 Load 里。
+            Strings.CurrentLanguage = Localization.Parse(Settings.Language);
         }
 
         public static void Save()
@@ -171,6 +184,14 @@ namespace ShutdownTimer.Helpers
         // general settings
         public bool RememberLastState { get; set; }
         public string TrayIconTheme { get; set; } = "Automatic";
+
+        /// <summary>
+        /// 界面语言，取值是 <see cref="Language"/> 的枚举名（"English" / "ZhHans" / "Ja"）。
+        /// 存英文枚举名而不是本地化显示名，与本文件其它设置项一致：
+        /// 换语言不会把已保存的值变成不认识的东西。
+        /// </summary>
+        public string Language { get; set; } = "ZhHans";
+
         public TimerData DefaultTimer { get; set; } = new TimerData();
         public bool RememberLastScreenPositionUI { get; set; }
         public LastScreenPosition LastScreenPositionUI { get; set; }

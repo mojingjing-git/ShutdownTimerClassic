@@ -157,6 +157,27 @@ namespace ShutdownTimer
             else { gracefulCheckBox.Enabled = false; }
         }
 
+        /// <summary>
+        /// 设置窗切换语言后由它调用，把主界面也重刷成新语言。
+        /// </summary>
+        /// <remarks>
+        /// 设置窗是 <c>ShowDialog()</c> 打开的，关掉它用户眼前就剩主界面——
+        /// 如果只刷新设置窗，关掉以后主界面会停在旧语言，像"设置没生效"。
+        /// </remarks>
+        internal void RefreshLanguageUi()
+        {
+            ApplyTexts();
+
+            // 组合框的 Display 是查表来的，不重建就还是旧语言。
+            // 先把英文值取出来存好：Fill() 内部的 SelectValue() 在新表里找不到匹配时会
+            // 回落到第一项，等于用户选的动作被悄悄改掉。
+            string action = LocalizedCatalog.GetValue(actionComboBox);
+            LocalizedCatalog.Fill(actionComboBox, LocalizedCatalog.PowerActions(), action);
+
+            // 换字体。必须排在 ApplyTexts 之后：文案变了，AutoSize 控件的宽度才会跟着变。
+            Localization.ApplyTo(this);
+        }
+
         private void SettingsButton_Click(object sender, EventArgs e)
         {
             ExceptionHandler.Log("Showing settings form");

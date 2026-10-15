@@ -36,6 +36,9 @@
             this.githubLinkLabel = new System.Windows.Forms.LinkLabel();
             this.settingsTabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.languageGroupBox = new System.Windows.Forms.GroupBox();
+            this.languageComboBox = new System.Windows.Forms.ComboBox();
+            this.languageLabel = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.enableMultipleInstances = new System.Windows.Forms.CheckBox();
             this.rememberLastScreenPositionCountdown = new System.Windows.Forms.CheckBox();
@@ -96,6 +99,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.titlebarPictureBox)).BeginInit();
             this.settingsTabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.languageGroupBox.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.trayiconGroupBox.SuspendLayout();
             this.defaultSettingsGroupBox.SuspendLayout();
@@ -148,7 +152,7 @@
             this.footerLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.footerLabel.Font = new System.Drawing.Font("Microsoft YaHei UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.footerLabel.Location = new System.Drawing.Point(12, 495);
+            this.footerLabel.Location = new System.Drawing.Point(12, 540);
             this.footerLabel.Name = "footerLabel";
             this.footerLabel.Size = new System.Drawing.Size(310, 18);
             this.footerLabel.TabIndex = 560;
@@ -179,11 +183,12 @@
             this.settingsTabControl.Location = new System.Drawing.Point(18, 54);
             this.settingsTabControl.Name = "settingsTabControl";
             this.settingsTabControl.SelectedIndex = 0;
-            this.settingsTabControl.Size = new System.Drawing.Size(304, 438);
+            this.settingsTabControl.Size = new System.Drawing.Size(304, 483);
             this.settingsTabControl.TabIndex = 10;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.languageGroupBox);
             this.tabPage1.Controls.Add(this.groupBox1);
             this.tabPage1.Controls.Add(this.trayiconGroupBox);
             this.tabPage1.Controls.Add(this.clearSettingsButton);
@@ -191,19 +196,51 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(296, 412);
+            this.tabPage1.Size = new System.Drawing.Size(296, 457);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "常规";
             this.tabPage1.UseVisualStyleBackColor = true;
-            // 
+            //
+            // languageGroupBox
+            //
+            this.languageGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.languageGroupBox.Controls.Add(this.languageComboBox);
+            this.languageGroupBox.Controls.Add(this.languageLabel);
+            this.languageGroupBox.Location = new System.Drawing.Point(6, 6);
+            this.languageGroupBox.Name = "languageGroupBox";
+            this.languageGroupBox.Size = new System.Drawing.Size(284, 40);
+            this.languageGroupBox.TabIndex = 5;
+            this.languageGroupBox.TabStop = false;
+            this.languageGroupBox.Text = "界面语言";
+            //
+            // languageComboBox
+            //
+            this.languageComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.languageComboBox.FormattingEnabled = true;
+            this.languageComboBox.Location = new System.Drawing.Point(91, 13);
+            this.languageComboBox.Name = "languageComboBox";
+            this.languageComboBox.Size = new System.Drawing.Size(150, 21);
+            this.languageComboBox.TabIndex = 6;
+            this.languageComboBox.SelectedIndexChanged += new System.EventHandler(this.LanguageComboBox_SelectedIndexChanged);
+            //
+            // languageLabel
+            //
+            this.languageLabel.AutoSize = true;
+            this.languageLabel.Location = new System.Drawing.Point(6, 16);
+            this.languageLabel.Name = "languageLabel";
+            this.languageLabel.Size = new System.Drawing.Size(53, 13);
+            this.languageLabel.TabIndex = 7;
+            this.languageLabel.Text = "语言：";
+            //
             // groupBox1
-            // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            //
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.enableMultipleInstances);
             this.groupBox1.Controls.Add(this.rememberLastScreenPositionCountdown);
             this.groupBox1.Controls.Add(this.rememberLastScreenPositionUI);
-            this.groupBox1.Location = new System.Drawing.Point(6, 249);
+            this.groupBox1.Location = new System.Drawing.Point(6, 294);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(284, 76);
             this.groupBox1.TabIndex = 180;
@@ -246,7 +283,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.trayiconGroupBox.Controls.Add(this.trayiconThemeComboBox);
             this.trayiconGroupBox.Controls.Add(this.trayiconThemeLabel);
-            this.trayiconGroupBox.Location = new System.Drawing.Point(6, 331);
+            this.trayiconGroupBox.Location = new System.Drawing.Point(6, 376);
             this.trayiconGroupBox.Name = "trayiconGroupBox";
             this.trayiconGroupBox.Size = new System.Drawing.Size(284, 40);
             this.trayiconGroupBox.TabIndex = 220;
@@ -257,9 +294,9 @@
             // 
             this.trayiconThemeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.trayiconThemeComboBox.FormattingEnabled = true;
-            this.trayiconThemeComboBox.Location = new System.Drawing.Point(91, 13);
+            this.trayiconThemeComboBox.Location = new System.Drawing.Point(142, 13);
             this.trayiconThemeComboBox.Name = "trayiconThemeComboBox";
-            this.trayiconThemeComboBox.Size = new System.Drawing.Size(121, 21);
+            this.trayiconThemeComboBox.Size = new System.Drawing.Size(136, 21);
             this.trayiconThemeComboBox.TabIndex = 240;
             // 
             // trayiconThemeLabel
@@ -274,7 +311,7 @@
             // clearSettingsButton
             // 
             this.clearSettingsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.clearSettingsButton.Location = new System.Drawing.Point(161, 383);
+            this.clearSettingsButton.Location = new System.Drawing.Point(161, 428);
             this.clearSettingsButton.Name = "clearSettingsButton";
             this.clearSettingsButton.Size = new System.Drawing.Size(129, 23);
             this.clearSettingsButton.TabIndex = 250;
@@ -288,7 +325,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.defaultSettingsGroupBox.Controls.Add(this.customDefaultsGroupBox);
             this.defaultSettingsGroupBox.Controls.Add(this.rememberStateCheckBox);
-            this.defaultSettingsGroupBox.Location = new System.Drawing.Point(6, 6);
+            this.defaultSettingsGroupBox.Location = new System.Drawing.Point(6, 51);
             this.defaultSettingsGroupBox.Name = "defaultSettingsGroupBox";
             this.defaultSettingsGroupBox.Size = new System.Drawing.Size(284, 241);
             this.defaultSettingsGroupBox.TabIndex = 20;
@@ -472,7 +509,7 @@
             this.tabPage2.Controls.Add(this.forceFlagGroupBox);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(296, 412);
+            this.tabPage2.Size = new System.Drawing.Size(296, 457);
             this.tabPage2.TabIndex = 0;
             this.tabPage2.Text = "高级";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -483,7 +520,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.developerGroupBox.Controls.Add(this.openAppDataLinkLabel);
             this.developerGroupBox.Controls.Add(this.saveLogsCheckBox);
-            this.developerGroupBox.Location = new System.Drawing.Point(6, 343);
+            this.developerGroupBox.Location = new System.Drawing.Point(6, 357);
             this.developerGroupBox.Name = "developerGroupBox";
             this.developerGroupBox.Size = new System.Drawing.Size(284, 58);
             this.developerGroupBox.TabIndex = 410;
@@ -520,7 +557,7 @@
             this.passwordGroupBox.Controls.Add(this.passwordCheckBox);
             this.passwordGroupBox.Location = new System.Drawing.Point(6, 267);
             this.passwordGroupBox.Name = "passwordGroupBox";
-            this.passwordGroupBox.Size = new System.Drawing.Size(284, 70);
+            this.passwordGroupBox.Size = new System.Drawing.Size(284, 84);
             this.passwordGroupBox.TabIndex = 380;
             this.passwordGroupBox.TabStop = false;
             this.passwordGroupBox.Text = "密码保护";
@@ -529,7 +566,7 @@
             // 
             this.passwordLabel.Location = new System.Drawing.Point(6, 16);
             this.passwordLabel.Name = "passwordLabel";
-            this.passwordLabel.Size = new System.Drawing.Size(272, 28);
+            this.passwordLabel.Size = new System.Drawing.Size(272, 42);
             this.passwordLabel.TabIndex = 390;
             this.passwordLabel.Text = "使用密码锁定倒计时界面，密码在开始关机后设置。";
 
@@ -537,7 +574,7 @@
             // passwordCheckBox
             // 
             this.passwordCheckBox.AutoSize = true;
-            this.passwordCheckBox.Location = new System.Drawing.Point(6, 47);
+            this.passwordCheckBox.Location = new System.Drawing.Point(6, 61);
             this.passwordCheckBox.Name = "passwordCheckBox";
             this.passwordCheckBox.Size = new System.Drawing.Size(157, 17);
             this.passwordCheckBox.TabIndex = 400;
@@ -703,7 +740,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(296, 412);
+            this.tabPage3.Size = new System.Drawing.Size(296, 457);
             this.tabPage3.TabIndex = 0;
             this.tabPage3.Text = "关于";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -851,7 +888,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(334, 522);
+            this.ClientSize = new System.Drawing.Size(334, 567);
             this.Controls.Add(this.githubLinkLabel);
             this.Controls.Add(this.footerLabel);
             this.Controls.Add(this.appLabel);
@@ -871,6 +908,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.titlebarPictureBox)).EndInit();
             this.settingsTabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.languageGroupBox.ResumeLayout(false);
+            this.languageGroupBox.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.trayiconGroupBox.ResumeLayout(false);
@@ -958,6 +997,9 @@
         private System.Windows.Forms.RadioButton timeOfDayModeRadioButton;
         private System.Windows.Forms.RadioButton countdownModeRadioButton;
         private System.Windows.Forms.CheckBox transparentWindowCheckBox;
+        private System.Windows.Forms.GroupBox languageGroupBox;
+        private System.Windows.Forms.ComboBox languageComboBox;
+        private System.Windows.Forms.Label languageLabel;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox rememberLastScreenPositionCountdown;
         private System.Windows.Forms.CheckBox rememberLastScreenPositionUI;
