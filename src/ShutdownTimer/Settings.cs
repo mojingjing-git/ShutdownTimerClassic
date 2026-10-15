@@ -19,8 +19,8 @@ namespace ShutdownTimer
             appLabel.Text += "_debug";
 #endif
 
-            // 使用微软雅黑以正确显示中文字符，避免字体回退导致的排版问题。
-            this.Font = new Font("Microsoft YaHei UI", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
+            // 按当前语言统一应用字体，替换掉 Designer 里硬编码的微软雅黑。
+            Localization.ApplyTo(this);
 
             LoadSettings();
         }

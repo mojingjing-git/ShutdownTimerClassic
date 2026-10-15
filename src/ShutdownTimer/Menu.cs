@@ -66,8 +66,8 @@ namespace ShutdownTimer
             infoToolTip.SetToolTip(countdownModeRadioButton, "从下方设置的时、分、秒开始倒数，\n就像普通计时器一样，归零后执行所选动作。");
             infoToolTip.SetToolTip(timeOfDayModeRadioButton, "在此模式下可选择目标时刻（24 小时制）。\n若该时刻已过，将自动顺延至次日。\n\n点击开始后，程序会据此计算倒计时时长。\n");
 
-            // 使用微软雅黑以正确显示中文字符，避免字体回退导致的布局问题。
-            this.Font = new Font("Microsoft YaHei UI", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
+            // 按当前语言统一应用字体，替换掉 Designer 里硬编码的微软雅黑。
+            Localization.ApplyTo(this);
 
             ExceptionHandler.Log("Form initialized");
         }

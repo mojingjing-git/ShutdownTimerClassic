@@ -1,3 +1,4 @@
+using ShutdownTimer.Helpers;
 using System;
 using System.Windows.Forms;
 
@@ -51,25 +52,44 @@ namespace ShutdownTimer
     /// </summary>
     public static class LocalizedCatalog
     {
-        /// <summary>Power actions, in the original drop-down order.</summary>
-        public static readonly LocalizedItem[] PowerActions =
+        /// <summary>
+        /// 电源动作，保持原有的下拉顺序。
+        ///
+        /// 做成方法而不是 static 字段：Display 现在来自 <see cref="Strings"/> 查表，
+        /// 需要在语言确定之后再构造，而不是在类型初始化时就把某一种语言的文本固化死。
+        /// 每次调用返回新数组，调用方（包括 <c>*.Designer.cs</c>）请勿缓存结果。
+        ///
+        /// 注意：<see cref="LocalizedItem.Value"/> 是英文原文，是
+        /// <see cref="Timer.ExecutePowerAction"/> 的 switch case、是 settings.json 的持久化值、
+        /// 也是命令行 <c>/SetAction</c> 的参数，<b>任何时候都不能翻译</b>。
+        /// </summary>
+        public static LocalizedItem[] PowerActions()
         {
-            new LocalizedItem("Shutdown",        "关机"),
-            new LocalizedItem("Restart",         "重启"),
-            new LocalizedItem("Hibernate",       "休眠"),
-            new LocalizedItem("Sleep",           "睡眠"),
-            new LocalizedItem("Logout",          "注销"),
-            new LocalizedItem("Lock",            "锁定"),
-            new LocalizedItem("Custom Command",  "自定义命令")
-        };
+            return new LocalizedItem[]
+            {
+                new LocalizedItem("Shutdown",       Strings.T("Shutdown")),
+                new LocalizedItem("Restart",        Strings.T("Restart")),
+                new LocalizedItem("Hibernate",      Strings.T("Hibernate")),
+                new LocalizedItem("Sleep",          Strings.T("Sleep")),
+                new LocalizedItem("Logout",         Strings.T("Logout")),
+                new LocalizedItem("Lock",           Strings.T("Lock")),
+                new LocalizedItem("Custom Command", Strings.T("Custom Command"))
+            };
+        }
 
-        /// <summary>Tray icon themes, in the original drop-down order.</summary>
-        public static readonly LocalizedItem[] TrayIconThemes =
+        /// <summary>
+        /// 托盘图标主题，保持原有的下拉顺序。同样每次返回新数组，Value（Light / Dark）
+        /// 被 <see cref="Countdown"/> 直接比较，不可翻译。
+        /// </summary>
+        public static LocalizedItem[] TrayIconThemes()
         {
-            new LocalizedItem("Automatic", "自动"),
-            new LocalizedItem("Light",     "浅色"),
-            new LocalizedItem("Dark",      "深色")
-        };
+            return new LocalizedItem[]
+            {
+                new LocalizedItem("Automatic", Strings.T("Automatic")),
+                new LocalizedItem("Light",     Strings.T("Light")),
+                new LocalizedItem("Dark",      Strings.T("Dark"))
+            };
+        }
 
         /// <summary>
         /// Fills a combo box with localized items and selects the entry matching

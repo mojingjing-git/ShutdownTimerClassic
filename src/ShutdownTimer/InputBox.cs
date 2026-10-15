@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShutdownTimer.Helpers;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -24,8 +25,8 @@ namespace ShutdownTimer
             messageLabel.Text = Message;
             if (PasswordMode) { inputTextBox.PasswordChar = Convert.ToChar("*"); }
 
-            // 使用微软雅黑以正确显示中文字符，避免字体回退导致的排版问题。
-            this.Font = new Font("Microsoft YaHei UI", 8.25f, FontStyle.Regular, GraphicsUnit.Point, 0);
+            // 按当前语言统一应用字体，替换掉 Designer 里硬编码的微软雅黑。
+            Localization.ApplyTo(this);
         }
 
         private void OkButton_Click(object sender, EventArgs e)

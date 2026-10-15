@@ -257,7 +257,7 @@
             // 
             this.trayiconThemeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.trayiconThemeComboBox.FormattingEnabled = true;
-            LocalizedCatalog.Fill(this.trayiconThemeComboBox, LocalizedCatalog.TrayIconThemes, "Automatic");
+            LocalizedCatalog.Fill(this.trayiconThemeComboBox, LocalizedCatalog.TrayIconThemes(), "Automatic");
             this.trayiconThemeComboBox.Location = new System.Drawing.Point(91, 13);
             this.trayiconThemeComboBox.Name = "trayiconThemeComboBox";
             this.trayiconThemeComboBox.Size = new System.Drawing.Size(121, 21);
@@ -448,7 +448,7 @@
             // 
             this.actionComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.actionComboBox.FormattingEnabled = true;
-            LocalizedCatalog.Fill(this.actionComboBox, LocalizedCatalog.PowerActions, "Shutdown");
+            LocalizedCatalog.Fill(this.actionComboBox, LocalizedCatalog.PowerActions(), "Shutdown");
             this.actionComboBox.Location = new System.Drawing.Point(99, 13);
             this.actionComboBox.Name = "actionComboBox";
             this.actionComboBox.Size = new System.Drawing.Size(147, 21);
