@@ -1,6 +1,6 @@
 # Shutdown Timer Classic 🕒 中文版
 
-本文件是上游英文版 [README](README.upstream.md) 的中文翻译。原作者：[Lukas Langrock](https://github.com/lukaslangrock/ShutdownTimerClassic)，MIT 许可。本仓库在其基础上增加了简体中文界面与高 DPI（Per-Monitor V2）修复。
+本文件是上游英文版 [README](README.upstream.md) 的**中文翻译**。原作者：[Lukas Langrock](https://github.com/lukaslangrock/ShutdownTimerClassic)，MIT 许可。本仓库在其基础上增加了简体中文界面与高 DPI（Per-Monitor V2）修复。
 
 ---
 
@@ -13,6 +13,8 @@ Shutdown Timer Classic 是一个小巧的 Windows 应用程序，可以设置一
 我之后还打算开发一个更高级、更漂亮的版本。
 
 **想贡献代码或者看看我的代码？** 太好了，我欢迎*人类*的贡献，也很想听听你的意见。想上手的话，可以先看看我的[文件与目录结构](Structure.md)文档，了解各个部分是怎么关联起来的。
+
+你可以在部分环节借助 AI 辅助，但**请不要发布由 AI 生成的文本**。Issue 和 PR 不应由大语言模型代为发布，因为我（一个真人）需要亲自审阅它们，我也更希望和真人而不是机器人一起协作。如果你对 AI 的使用超出了调研或简单自动补全的范围，请在提交中说明你的 AI 使用情况。
 
 # 安装 💿
 
@@ -62,14 +64,10 @@ Shutdown Timer 用法很简单。
 ![Screenshot of countdown window with green background](media/screenshots/CountdownGreen.png)
 ![Screenshot of countdown window with yellow background](media/screenshots/CountdownYellow.png)
 ![Screenshot of countdown window with orange background](media/screenshots/CountdownOrange.png)
-![Screenshot of countdown window with red background](media/screenshots/CountdownRed.png)
-![Screenshot of countdown window with black background](media/screenshots/CountdownBlack.png)
 
 # 托盘菜单 🔧
 
 Shutdown Timer 还带一个托盘菜单，可以从任务栏托盘控制程序。在图标上右键即可呼出（你可能需要点击任务栏右侧的小箭头才能找到它）。你可以从中停止、重启、查看计时器，也可以切换 UI 模式来隐藏或显示倒计时窗口。
-
-![Screenshot of the tray menu](media/screenshots/TrayMenu.png)
 
 在倒计时窗口里右键也能打开同一个菜单。
 
