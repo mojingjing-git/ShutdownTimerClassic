@@ -121,17 +121,17 @@ namespace ShutdownTimer
 
         private void GithubLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/lukaslangrock/ShutdownTimerClassic");
+            System.Diagnostics.Process.Start("https://github.com/mojingjing-git/ShutdownTimerClassic");
         }
 
         private void AppLicenseLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/lukaslangrock/ShutdownTimerClassic/blob/master/LICENSE");
+            System.Diagnostics.Process.Start("https://github.com/mojingjing-git/ShutdownTimerClassic/blob/master/LICENSE");
         }
 
         private void AppSourceLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/lukaslangrock/ShutdownTimerClassic");
+            System.Diagnostics.Process.Start("https://github.com/mojingjing-git/ShutdownTimerClassic");
         }
 
         private void FALicenseLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -146,7 +146,7 @@ namespace ShutdownTimer
 
         private void GithubButton_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/lukaslangrock/ShutdownTimerClassic/issues");
+            System.Diagnostics.Process.Start("https://github.com/mojingjing-git/ShutdownTimerClassic/issues");
         }
 
         private void EmailButton_Click(object sender, EventArgs e)

@@ -32,8 +32,7 @@ namespace ShutdownTimer.Helpers
             string message = "程序遇到严重错误，已处于无法恢复的状态。由于无法再保证可靠运行，程序将被终止。\n\n" +
                 "包含进程信息与错误详情的日志文件已保存到你的桌面。\n" +
                 "请在 GitHub 上提交 issue，并附上该日志文件的内容，以便定位和修复问题。\n\n" +
-                "GitHub：github.com/lukaslangrock/ShutdownTimerClassic/issues\n" +
-                "邮件：lukas.langrock@outlook.de";
+                "GitHub：github.com/mojingjing-git/ShutdownTimerClassic/issues";
             MessageBox.Show(message, "定时关机助手崩溃，需要终止！", MessageBoxButtons.OK, MessageBoxIcon.Error);
             Process.Start(filepath); // Show log to user
 
@@ -84,7 +83,7 @@ namespace ShutdownTimer.Helpers
             {
                 log.AppendLine($"{Application.ProductName}@{Application.ProductVersion.Remove(Application.ProductVersion.LastIndexOf("."))} experienced a critical exception.");
                 log.AppendLine("The following data includes information about your system, the exception and the internal state of the application at the time of the exception. You may remove certain information (like your username which may be included in the log) to protect your privacy.");
-                log.AppendLine("Please open an issue on https://github.com/lukaslangrock/ShutdownTimerClassic and include the contents of this log file to help identify and fix the issue.");
+                log.AppendLine("Please open an issue on https://github.com/mojingjing-git/ShutdownTimerClassic and include the contents of this log file to help identify and fix the issue.");
             }
             else
             {

@@ -18,13 +18,11 @@ Shutdown Timer Classic 是一个小巧的 Windows 应用程序，可以设置一
 
 # 安装 💿
 
-**推荐**：[Microsoft Store](https://www.microsoft.com/store/apps/9NTDG6C9BTTW?cid=github.com)
+**推荐**：[本仓库的 Releases](https://github.com/mojingjing-git/ShutdownTimerClassic/releases)
 
-Microsoft Store 是唯一一个会自动更新的官方下载渠道（更新由微软管理，而程序本身不联网、无法自行检查更新）。
+解压整个压缩包即可直接运行，所有文件保持在同一个文件夹内，不要重命名任何文件。
 
-**备选**：[GitHub Releases](https://github.com/lukaslangrock/ShutdownTimerClassic/releases) 或[作者的镜像](https://files.langrock.info/apps/ShutdownTimerClassic/)。
-
-这些构建随每个稳定版一同提供，包含可直接运行的二进制文件和一个安装程序。如果你想直接用二进制文件，请解压整个压缩包，并保持所有文件在同一个文件夹内。
+**英文原版**：[Microsoft Store](https://www.microsoft.com/store/apps/9NTDG6C9BTTW?cid=github.com)。这是上游作者的官方渠道，也是唯一会自动更新的下载方式（更新由微软管理，而程序本身不联网、无法自行检查更新）。
 
 **开发版**：这是我的一个低优先级副业，所以发版很稀疏。不过本项目配置了 CI，会为每次新提交生成并发布构建产物。这些是开发版，可能无法正常工作，也可能包含尚未完成的功能，请自行斟酌使用（这也是这里不放链接的原因——它们不适合不熟悉软件开发的人）。
 
