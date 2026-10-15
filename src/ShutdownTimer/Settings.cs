@@ -14,7 +14,7 @@ namespace ShutdownTimer
 
         private void Settings_Load(object sender, EventArgs e)
         {
-            appLabel.Text = Application.ProductName + "@v" + Application.ProductVersion.Remove(Application.ProductVersion.LastIndexOf("."));
+            appLabel.Text = Strings.T("Shutdown Timer Classic") + "@v" + Application.ProductVersion.Remove(Application.ProductVersion.LastIndexOf("."));
 #if DEBUG
             appLabel.Text += "_debug";
 #endif
@@ -211,7 +211,7 @@ namespace ShutdownTimer
                 // ensure user understands implications from this action
                 if (hideTrayIconCheckBox.Focused)
                 {
-                    DialogResult result = MessageBox.Show("禁用托盘图标后，程序在后台运行时将无法与其交互。\n遇到这种情况你只能用任务管理器强制结束程序。\n\n通知功能也会随之失效！\n\n确定要启用该选项吗？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                    DialogResult result = MessageBox.Show(Strings.T("Disabling the tray icon will prevent you from interacting with the application when it's running in the background.\nYour only choice in such a case is to kill the application with Task Manager.\n\nNotifications will also stop working!\n\nAre you sure you want to enable this option?"), Strings.T("Warning"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                     if (result != DialogResult.Yes)
                     {
                         hideTrayIconCheckBox.Checked = false;

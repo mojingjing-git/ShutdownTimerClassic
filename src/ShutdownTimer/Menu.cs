@@ -43,7 +43,7 @@ namespace ShutdownTimer
                 ExceptionHandler.Log("Checking for running instance");
                 if (!ApplicationInstanceManager.IsSingleInstance())
                 {
-                    MessageBox.Show("本程序已在运行。若要允许多开，请在应用设置中勾选“允许多开”选项。\n\n即将退出……", "程序已在运行！", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(Strings.T("Another instance of this application is already running. To allow multiple instances, please check the \"Allow multiple instances\" option in the application settings.\n\nExiting... (Main menu)"), Strings.T("Application already running!"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     ExceptionHandler.Log("Another instance detected; exiting");
                     Application.Exit();
                 }
@@ -60,11 +60,11 @@ namespace ShutdownTimer
             versionLabel.Text += "_debug";
 #endif
 
-            infoToolTip.SetToolTip(gracefulCheckBox, "默认情况下，未响应关闭提示的程序会被强制结束，以确保关机顺利完成。\n\n而“安全关机”会等待所有程序自行退出后再继续关机。\n如果某个程序无响应，或需要用户交互才能退出，可能会导致关机失败。");
-            infoToolTip.SetToolTip(preventSleepCheckBox, "根据系统的电源设置，一段时间无操作后电脑可能会自动进入睡眠。\n启用此选项可让系统保持唤醒，确保计时器能正常运行并准时执行动作。");
-            infoToolTip.SetToolTip(backgroundCheckBox, "启动倒计时后不显示窗口，仅在任务栏托盘显示一个图标。");
-            infoToolTip.SetToolTip(countdownModeRadioButton, "从下方设置的时、分、秒开始倒数，\n就像普通计时器一样，归零后执行所选动作。");
-            infoToolTip.SetToolTip(timeOfDayModeRadioButton, "在此模式下可选择目标时刻（24 小时制）。\n若该时刻已过，将自动顺延至次日。\n\n点击开始后，程序会据此计算倒计时时长。\n");
+            infoToolTip.SetToolTip(gracefulCheckBox, Strings.T("Applications that do not exit when prompted automatically get terminated by default to ensure a successful shutdown.\n\nA graceful shutdown, on the other hand, will wait for all applications to exit before continuing with the shutdown.\nThis might result in an unsuccessful shutdown if one or more applications are unresponsive or require a user interaction to exit."));
+            infoToolTip.SetToolTip(preventSleepCheckBox, Strings.T("Depending on the power settings of your system, it might go to sleep after a certain amount of time due to inactivity.\nThis option will keep the system awake to ensure the timer can properly run and execute a shutdown."));
+            infoToolTip.SetToolTip(backgroundCheckBox, Strings.T("This will launch the countdown without a visible window but will show a tray icon in your taskbar."));
+            infoToolTip.SetToolTip(countdownModeRadioButton, Strings.T("Will count down from the hours, minutes and seconds selected below,\nlike a countdown timer, and execute the power action when it reaches zero."));
+            infoToolTip.SetToolTip(timeOfDayModeRadioButton, Strings.T("In this mode you can select the target time of day (24h clock) for the power action.\nIf the time has already passed, it will roll over to tomorrow.\n\nWhen you press start, the appropriate countdown will be calculated.\n"));
 
             // 按当前语言统一应用字体，替换掉 Designer 里硬编码的微软雅黑。
             Localization.ApplyTo(this);
@@ -148,7 +148,7 @@ namespace ShutdownTimer
                 ExceptionHandler.Log("Custom command requested");
                 using (var form = new InputBox())
                 {
-                    form.Title = "自定义命令";
+                    form.Title = Strings.T("Custom Command");
 
                     ExceptionHandler.Log("Prompting for custom command");
                     var result = form.ShowDialog();
@@ -162,7 +162,7 @@ namespace ShutdownTimer
                     if (String.IsNullOrWhiteSpace(form.ReturnValue))
                     {
                         ExceptionHandler.Log("Invalid custom command input; aborting");
-                        MessageBox.Show("自定义命令不能为空。请输入有效命令，或改用其它动作！", "无效命令！", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Strings.T("Custom command field was empty. Please enter a valid command or use a different action!"), Strings.T("Invalid command!"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -180,7 +180,7 @@ namespace ShutdownTimer
                 ExceptionHandler.Log("Password protection enabled");
                 using (var form = new InputBox())
                 {
-                    form.Title = "密码保护";
+                    form.Title = Strings.T("Password Protection");
                     form.PasswordMode = true;
                     ExceptionHandler.Log("Prompting for password");
                     if (form.ShowDialog() == DialogResult.OK)
@@ -304,7 +304,7 @@ namespace ShutdownTimer
             if (ArgMode.Equals("Lock"))
             {
                 ExceptionHandler.Log("Setting 'Lock' mode");
-                startButton.Text = "开始（使用推荐设置）";
+                startButton.Text = Strings.T("Start (with recommended settings)");
                 settingsButton.Enabled = false;
                 actionGroupBox.Enabled = false;
                 timeGroupBox.Enabled = false;

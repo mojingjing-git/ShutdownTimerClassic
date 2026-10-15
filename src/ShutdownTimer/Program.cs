@@ -30,7 +30,7 @@ namespace ShutdownTimer
                 catch (Exception ex)
                 {
                     ExceptionHandler.Log("Failed to process CLI args: " + ex.Message);
-                    MessageBox.Show("处理命令行参数失败：\n\n" + ex.Message, "无效参数", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Strings.T("Failed to process command line arguments:\n\n{0}", ex.Message), Strings.T("Invalid arguments"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -45,7 +45,7 @@ namespace ShutdownTimer
                 if (Array.IndexOf(validActions, ArgProcessor.argAction) == -1)
                 {
                     ExceptionHandler.Log("Launch aborted: invalid /SetAction argument");
-                    MessageBox.Show($"'{ArgProcessor.argAction}' 不是有效的动作。\n\n请使用 /SetAction 参数指定有效动作。", "无效动作", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Strings.T("'{0}' is not a valid action.\n\nPlease supply a valid action using the /SetAction argument.", ArgProcessor.argAction), Strings.T("Invalid action"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -81,7 +81,7 @@ namespace ShutdownTimer
                         if (string.IsNullOrWhiteSpace(ArgProcessor.argTime) || ArgProcessor.argTimeTS <= TimeSpan.Zero)
                         {
                             ExceptionHandler.Log("Launch aborted: time is missing, zero, or invalid");
-                            MessageBox.Show("倒计时需要大于零的有效时间。\n\n请使用 /SetTime 参数指定该时间。", "无效时间", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Strings.T("The countdown requires a valid time greater than zero.\n\nPlease supply one using the /SetTime argument."), Strings.T("Invalid time"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
 
@@ -89,7 +89,7 @@ namespace ShutdownTimer
                         if (ArgProcessor.argAction.Equals("Custom Command") && string.IsNullOrWhiteSpace(ArgProcessor.argCommand))
                         {
                             ExceptionHandler.Log("Launch aborted: action is 'Custom Command' but no /SetCommand argument was supplied");
-                            MessageBox.Show("“自定义命令”（Custom Command）动作需要指定要执行的命令。\n\n请使用 /SetCommand 参数指定该命令。", "缺少自定义命令", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Strings.T("The action 'Custom Command' requires a command to execute.\n\nPlease supply one using the /SetCommand argument."), Strings.T("Missing custom command"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
 
@@ -108,7 +108,7 @@ namespace ShutdownTimer
                         if (ArgProcessor.argMode != null)
                         {
                             ExceptionHandler.Log("Launch aborted: invalid /SetMode argument");
-                            MessageBox.Show($"'{ArgProcessor.argMode}' 不是有效的控制模式。\n\n有效模式为：Prefill、Lock、Launch、ForcedLaunch。", "无效模式", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Strings.T("'{0}' is not a valid control mode.\n\nValid modes are: Prefill, Lock, Launch, ForcedLaunch.", ArgProcessor.argMode), Strings.T("Invalid mode"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
                         break;

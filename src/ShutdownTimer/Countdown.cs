@@ -55,7 +55,7 @@ namespace ShutdownTimer
                 ExceptionHandler.Log("Checking for running instance");
                 if (!ApplicationInstanceManager.IsSingleInstance())
                 {
-                    MessageBox.Show("本程序已在运行。若要允许多开，请在应用设置中勾选“允许多开”选项。\n\n正在退出...", "程序已在运行！", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(Strings.T("Another instance of this application is already running. To allow multiple instances, please check the \"Allow multiple instances\" option in the application settings.\n\nExiting..."), Strings.T("Application already running!"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     ExceptionHandler.Log("Another instance detected; exiting");
                     Application.Exit();
                 }
@@ -108,7 +108,7 @@ namespace ShutdownTimer
 
             /// Setup UI
 
-            titleLabel.Text = LocalizedCatalog.DisplayFor(Timer.Action, LocalizedCatalog.PowerActions()) + " - 定时关机助手";
+            titleLabel.Text = LocalizedCatalog.DisplayFor(Timer.Action, LocalizedCatalog.PowerActions()) + Strings.T(" - Shutdown Timer Classic");
 
             TopMost = !SettingsProvider.Settings.DisableAlwaysOnTop;
 
@@ -191,7 +191,7 @@ namespace ShutdownTimer
 
                 case 2: // lock state 'unlocked': change lockstate to 'locked'
                     ExceptionHandler.Log("LockState=unlocked: confirming re-lock");
-                    DialogResult result = MessageBox.Show("是否要重新锁定倒计时界面？", "密码保护", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    DialogResult result = MessageBox.Show(Strings.T("Would you like to re-lock the countdown?"), Strings.T("Password Protection"), MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (result == DialogResult.Yes)
                     {
                         ExceptionHandler.Log("User confirmed lock");
@@ -240,8 +240,8 @@ namespace ShutdownTimer
             {
                 e.Cancel = true;
                 ExceptionHandler.Log("Prompting user to confirm exit");
-                string caption = "确定要取消吗？";
-                string message = "确定要取消本次计时吗？";
+                string caption = Strings.T("Are you sure?");
+                string message = Strings.T("Do you really want to cancel the timer?");
                 DialogResult question = MessageBox.Show(message, caption, MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (question == DialogResult.Yes) { ExceptionHandler.Log("User confirmed exit"); ExitApplication(); return; }
             }
@@ -283,7 +283,7 @@ namespace ShutdownTimer
                 ExceptionHandler.Log("Pausing timer");
                 Timer.Pause();
                 ExceptionHandler.Log("Sending cancellation notification");
-                SendNotification("已成功取消本次计时！\n程序即将关闭。"); // Show windows toast notification as confirmation
+                SendNotification(Strings.T("Your timer was canceled successfully!\nThe application will now close.")); // Show windows toast notification as confirmation
                 ExceptionHandler.Log("Saving settings");
                 SaveSettings();
                 ExceptionHandler.Log("Clearing EXECUTION_STATE flags");
@@ -339,7 +339,7 @@ namespace ShutdownTimer
                 Timer.Reset();
                 ExceptionHandler.Log("Update UI");
                 UpdateUI(Timer.CountdownTimeSpan);
-                if (this.WindowState == FormWindowState.Minimized) { SendNotification("计时已重置，距离执行电源动作还剩 " + Timer.CountdownTimeSpan.Hours + " 小时 " + Timer.CountdownTimeSpan.Minutes + " 分钟 " + Timer.CountdownTimeSpan.Seconds + " 秒。"); }
+                if (this.WindowState == FormWindowState.Minimized) { SendNotification(Strings.T("Timer has been reset. Remaining time until power action will be executed is {0} hours, {1} minutes and {2} seconds.", Timer.CountdownTimeSpan.Hours, Timer.CountdownTimeSpan.Minutes, Timer.CountdownTimeSpan.Seconds)); }
             }
         }
 
@@ -351,14 +351,14 @@ namespace ShutdownTimer
             if (Timer.IsRunning())
             {
                 Timer.Pause();
-                contextMenuStrip.Items[0].Text = "继续";
-                titleLabel.Text = LocalizedCatalog.DisplayFor(Timer.Action, LocalizedCatalog.PowerActions()) + " - 定时关机助手（已暂停）";
+                contextMenuStrip.Items[0].Text = Strings.T("Resume");
+                titleLabel.Text = LocalizedCatalog.DisplayFor(Timer.Action, LocalizedCatalog.PowerActions()) + Strings.T(" - Shutdown Timer Classic (paused)");
             }
             else
             {
                 Timer.Resume();
-                contextMenuStrip.Items[0].Text = "暂停";
-                titleLabel.Text = LocalizedCatalog.DisplayFor(Timer.Action, LocalizedCatalog.PowerActions()) + " - 定时关机助手";
+                contextMenuStrip.Items[0].Text = Strings.T("Pause");
+                titleLabel.Text = LocalizedCatalog.DisplayFor(Timer.Action, LocalizedCatalog.PowerActions()) + Strings.T(" - Shutdown Timer Classic");
             }
         }
 
@@ -370,8 +370,8 @@ namespace ShutdownTimer
             ExceptionHandler.Log("Prompting for new countdown time");
             using (var form = new InputBox())
             {
-                form.Title = "设置新的倒计时";
-                form.Message = "请按 HH:mm:ss 或 HH:mm 的格式输入新的倒计时时间。\n\n这将直接替换当前计时。";
+                form.Title = Strings.T("Set a new countdown");
+                form.Message = Strings.T("Enter new time for the countdown in the format of HH:mm:ss or HH:mm.\n\nThis will replace the current timer in place.");
                 TopMost = false;
                 form.ShowDialog();
                 TopMost = !SettingsProvider.Settings.DisableAlwaysOnTop;
@@ -382,7 +382,7 @@ namespace ShutdownTimer
                 else if (form.ReturnValue == "" || form.ReturnValue == null)
                 {
                     ExceptionHandler.Log("Update aborted: no input");
-                    MessageBox.Show("操作已中止：你没有输入新的时间值！", "倒计时更新", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Strings.T("Operation aborted: You have not supplied a new time value!"), Strings.T("Countdown Update"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 else
                 {
@@ -412,13 +412,13 @@ namespace ShutdownTimer
                         else
                         {
                             ExceptionHandler.Log("Update aborted: malformed input");
-                            MessageBox.Show("操作已中止：你输入的时间值无效！", "倒计时更新", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(Strings.T("Operation aborted: You have not supplied a valid time value!"), Strings.T("Countdown Update"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                     catch (Exception)
                     {
                         ExceptionHandler.Log("Update aborted: input processing error");
-                        MessageBox.Show("操作已中止：你输入的时间值无效，或在处理输入时发生了内部错误。", "倒计时更新", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(Strings.T("Operation aborted: You have either not supplied a valid time value or there was an internal error outside the scope of your input while processing it."), Strings.T("Countdown Update"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -440,7 +440,7 @@ namespace ShutdownTimer
             ignoreClose = true; // Prevent closing (and closing dialog) after ShowInTaskbar changed
             Hide();
 
-            SendNotification("计时器已最小化到后台运行。右键点击托盘图标可查看更多信息。");
+            SendNotification(Strings.T("Timer has been moved to the background. Right-click the tray icon for more info."));
         }
 
         /// <summary>
@@ -509,18 +509,16 @@ namespace ShutdownTimer
             string message;
             if (reasonBecauseOfAction)
             {
-                message = "本次倒计时已启用密码保护。请输入密码以解除锁定。\n" +
-                    "之后可通过点击锁形图标重新锁定倒计时界面。";
+                message = Strings.T("This countdown has been protected with a password. Enter your password to release the lock.\nYou can re-lock the countdown by clicking on the lock icon afterwards.");
             }
             else
             {
-                message = "请输入密码以解锁本次倒计时。\n\n" +
-                    "之后可通过点击锁形图标重新锁定倒计时界面。";
+                message = Strings.T("Enter your password to unlock this countdown.\n\nYou can re-lock the countdown by clicking on the lock icon afterwards.");
             }
 
             using (var form = new InputBox())
             {
-                form.Title = "密码保护";
+                form.Title = Strings.T("Password Protection");
                 form.Message = message;
                 form.PasswordMode = true;
                 TopMost = false;
@@ -540,7 +538,7 @@ namespace ShutdownTimer
                 else
                 {
                     ExceptionHandler.Log("Unlock has failed");
-                    MessageBox.Show("密码错误！\n\n在输入正确密码之前，本次倒计时将保持锁定。", "密码保护", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Strings.T("Incorrect password!\n\nThis countdown will stay locked until the correct password has been entered."), Strings.T("Password Protection"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
             }
@@ -698,7 +696,7 @@ namespace ShutdownTimer
 
                 if (IsForegroundUI) // UI for countdown window
                 {
-                    this.Text = "倒计时";
+                    this.Text = Strings.T("Countdown");
 
                     // Decide which color/animation to use
                     if (!SettingsProvider.Settings.DisableAnimations)
@@ -715,14 +713,14 @@ namespace ShutdownTimer
                 }
                 else // UI for tray menu
                 {
-                    this.Text = "倒计时 - " + elapsedTime;
+                    this.Text = Strings.T("Countdown - ") + elapsedTime;
 
                     // Decide which tray message to show          
-                    if (ts.Days == 0 && ts.Hours == 2 && ts.Minutes == 0 && ts.Seconds == 00) { SendNotification("距离执行电源动作还剩 2 小时"); }
-                    else if (ts.Days == 0 && ts.Hours == 1 && ts.Minutes == 0 && ts.Seconds == 00) { SendNotification("距离执行电源动作还剩 1 小时。"); }
-                    else if (ts.Days == 0 && ts.Hours == 0 && ts.Minutes == 30 && ts.Seconds == 00) { SendNotification("距离执行电源动作还剩 30 分钟。"); }
-                    else if (ts.Days == 0 && ts.Hours == 0 && ts.Minutes == 5 && ts.Seconds == 00) { SendNotification("距离执行电源动作还剩 5 分钟。"); }
-                    else if (ts.Days == 0 && ts.Hours == 0 && ts.Minutes == 0 && ts.Seconds == 30) { SendNotification("距离执行电源动作还剩 30 秒。"); }
+                    if (ts.Days == 0 && ts.Hours == 2 && ts.Minutes == 0 && ts.Seconds == 00) { SendNotification(Strings.T("2 hours remaining until the power action will be executed")); }
+                    else if (ts.Days == 0 && ts.Hours == 1 && ts.Minutes == 0 && ts.Seconds == 00) { SendNotification(Strings.T("1 hour remaining until the power action will be executed.")); }
+                    else if (ts.Days == 0 && ts.Hours == 0 && ts.Minutes == 30 && ts.Seconds == 00) { SendNotification(Strings.T("30 minutes remaining until the power action will be executed.")); }
+                    else if (ts.Days == 0 && ts.Hours == 0 && ts.Minutes == 5 && ts.Seconds == 00) { SendNotification(Strings.T("5 minutes remaining until the power action will be executed.")); }
+                    else if (ts.Days == 0 && ts.Hours == 0 && ts.Minutes == 0 && ts.Seconds == 30) { SendNotification(Strings.T("30 seconds remaining until the power action will be executed.")); }
                 }
             }
 

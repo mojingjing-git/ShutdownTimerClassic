@@ -29,11 +29,8 @@ namespace ShutdownTimer.Helpers
         {
             string filepath = ProduceLogfile(e, type, true, false);
 
-            string message = "程序遇到严重错误，已处于无法恢复的状态。由于无法再保证可靠运行，程序将被终止。\n\n" +
-                "包含进程信息与错误详情的日志文件已保存到你的桌面。\n" +
-                "请在 GitHub 上提交 issue，并附上该日志文件的内容，以便定位和修复问题。\n\n" +
-                "GitHub：github.com/mojingjing-git/ShutdownTimerClassic/issues";
-            MessageBox.Show(message, "定时关机助手崩溃，需要终止！", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            string message = Strings.T("The application ran into a critical error, leaving it in an unrecoverable state. As reliable operation can no longer be guaranteed, it will be terminated.\n\nA log file containing information about the process and the error has been saved to your desktop.\nPlease create an issue on GitHub and include the contents of this log file to help identify and fix the issue.\n\nGitHub: github.com/lukaslangrock/ShutdownTimerClassic/issues\nEmail: lukas.langrock@outlook.de");
+            MessageBox.Show(message, Strings.T("Shutdown Timer Classic crashed and needs to be terminated!"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             Process.Start(filepath); // Show log to user
 
             if (terminate)
