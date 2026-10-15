@@ -68,6 +68,10 @@ namespace ShutdownTimer
             ExceptionHandler.Log("Starting timer clock");
             Timer.Start();
 
+            // 用查表覆盖 Designer 里的硬编码中文。titleLabel 不在此列：
+            // 它紧接着就在下面的 “Setup UI” 段被 <动作名> + " - Shutdown Timer Classic" 整体覆盖。
+            ApplyTexts();
+
             ExceptionHandler.Log("Preparing UI");
 
             // Set custom background color / transparency
@@ -145,6 +149,34 @@ namespace ShutdownTimer
             UpdateUI(Timer.CountdownTimeSpan);
 
             ExceptionHandler.Log("Countdown sequence started");
+        }
+
+        /// <summary>
+        /// 用 <see cref="Strings"/> 查表覆盖 <c>Countdown.Designer.cs</c> 里硬编码的中文文案。
+        ///
+        /// 为什么不在 Designer 里直接改：<c>*.Designer.cs</c> 是 VS 自动生成的，
+        /// 手工写进去的改动在下次打开设计器、拖动控件时会连同 InitializeComponent()
+        /// 一起被重新生成覆盖掉。Designer 里的中文因此原样保留（开发者在设计器里
+        /// 看到的仍是中文），运行时由本方法用同一份查表结果覆盖，界面行为零变化。
+        ///
+        /// key 一律是上游的英文原文，与 <c>upstream/master</c> 的 Designer 逐字一致。
+        /// </summary>
+        private void ApplyTexts()
+        {
+            Text = Strings.T("Countdown");
+            AccessibleName = Strings.T("Shutdown Timer Countdown");
+            AccessibleDescription = Strings.T("Shows the time left until power action gets executed.");
+
+            notifyIcon.Text = Strings.T("Shutdown Timer");
+            notifyIcon.BalloonTipTitle = Strings.T("Shutdown Timer");
+
+            timerPauseMenuItem.Text = Strings.T("Pause");
+            timerStopMenuItem.Text = Strings.T("Stop and exit");
+            timerResetMenuItem.Text = Strings.T("Reset timer");
+            appRestartMenuItem.Text = Strings.T("Restart application");
+            timerUIHideMenuItem.Text = Strings.T("Move to background");
+            timerUIShowMenuItem.Text = Strings.T("Show countdown window");
+            updateTimeMenuItem.Text = Strings.T("Set a new countdown");
         }
 
         /// <summary>

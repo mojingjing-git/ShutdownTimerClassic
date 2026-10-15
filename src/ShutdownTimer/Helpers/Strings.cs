@@ -118,7 +118,99 @@ namespace ShutdownTimer.Helpers
             { "'{0}' is not a valid action.\n\nPlease supply a valid action using the /SetAction argument.", "'{0}' 不是有效的动作。\n\n请使用 /SetAction 参数指定有效动作。" },
             { "The countdown requires a valid time greater than zero.\n\nPlease supply one using the /SetTime argument.", "倒计时需要大于零的有效时间。\n\n请使用 /SetTime 参数指定该时间。" },
             { "The action 'Custom Command' requires a command to execute.\n\nPlease supply one using the /SetCommand argument.", "“自定义命令”（Custom Command）动作需要指定要执行的命令。\n\n请使用 /SetCommand 参数指定该命令。" },
-            { "'{0}' is not a valid control mode.\n\nValid modes are: Prefill, Lock, Launch, ForcedLaunch.", "'{0}' 不是有效的控制模式。\n\n有效模式为：Prefill、Lock、Launch、ForcedLaunch。" }
+            { "'{0}' is not a valid control mode.\n\nValid modes are: Prefill, Lock, Launch, ForcedLaunch.", "'{0}' 不是有效的控制模式。\n\n有效模式为：Prefill、Lock、Launch、ForcedLaunch。" },
+
+            // ===== 以下 key 来自 *.Designer.cs =====
+            // 这些字符串在 Designer 里仍然保留着中文（设计时预览用），运行时由各窗体
+            // 的 ApplyTexts() 用下面的查表结果覆盖，措辞与 Designer 里的中文逐字一致。
+            // key 一律取自 upstream/master 的英文原文，未做任何改写。
+
+            // ---------- Menu.Designer.cs（15 个 key / 17 处引用）----------
+            { "Shutdown Timer", "定时关机助手" },
+            { "The main window where you can choose the time and power action.", "主窗口：在此选择定时与电源动作。" },
+            { "What to do?", "执行什么动作？" },
+            { "When to do it?", "何时执行？" },
+            { "Select an action:", "选择动作：" },
+            { "At a specific time of day", "在指定的时刻" },
+            { "After a specific timespan", "在指定的时长后" },
+            { "Hours", "小时" },
+            { "Minutes", "分钟" },
+            { "Seconds", "秒" },
+            { "Prevent system from going to sleep", "阻止系统进入睡眠" },
+            { "Graceful (do not force close apps)", "安全关机（不强制关闭程序）" },
+            { "Run in background", "在后台运行" },
+            { "Start", "开始" },
+            { "Help", "帮助" },
+
+            // ---------- Settings.Designer.cs（44 个 key / 54 处引用）----------
+            // 其中 9 个与 Menu 窗共用（Hours / Minutes / Seconds / Select an action: /
+            // At a specific time of day / After a specific timespan / Prevent system from
+            // going to sleep / Graceful (do not force close apps) / Run in background）。
+            { "Shutdown Timer - Settings", "定时关机助手 - 设置" },
+            { "Settings", "设置" },
+            { "General", "常规" },
+            { "Advanced", "高级" },
+            { "About", "关于" },
+            { "Made with love in Germany", "用心打造，德国制造" },
+            { "View on GitHub", "在 GitHub 上查看" },
+
+            // 常规页
+            { "Application behaviour", "程序行为" },
+            { "Allow multiple instances", "允许多开" },
+            { "Remember last screen position (Countdown)", "记住倒计时窗口位置" },
+            { "Remember last screen position (Menu)", "记住主窗口位置" },
+            { "System tray menu", "系统托盘图标" },
+            { "Trayicon theme:", "托盘图标主题：" },
+            { "Clear Settings", "清除设置" },
+            { "Timer defaults", "定时器默认值" },
+            { "Custom defaults", "自定义默认值" },
+            { "Remember last state", "记住上次状态" },
+
+            // 高级页
+            { "Developer Options", "开发者选项" },
+            { "Open appdata folder", "打开 AppData 文件夹" },
+            { "Save event logs to appdata on exit", "退出时将事件日志保存到 AppData" },
+            { "Password protection", "密码保护" },
+            { "Locks the countdown UI with a password you can set when starting a shutdown after clicking start.", "使用密码锁定倒计时界面，密码在开始关机后设置。" },
+            { "Enable password protection", "启用密码保护" },
+            { "Countdown window", "倒计时窗口" },
+            { "Hide tray icon (not recommended)", "隐藏托盘图标（不推荐）" },
+            { "Transparent countdown window", "透明倒计时窗口" },
+            { "Adapt clock text to window size", "时钟文字自适应窗口大小" },
+            { "(set background color)", "（设置背景颜色）" },
+            { "Disable notifications and confirmations", "禁用通知与确认提示" },
+            { "Disable animations", "禁用动画效果" },
+            { "Disable always on top behaviour", "禁用窗口总在最前" },
+            { "Force flag", "强制标志" },
+            { "Changes how running applications are force-closed when\r\nusing a non-graceful shutdown.", "使用非安全方式关机时，将强制\r\n关闭正在运行的应用程序。" },
+            { "Documentation", "文档" },
+
+            // 关于页
+            { "About this app", "关于本应用" },
+            { "Create Logfile", "创建日志文件" },
+            { "Email", "邮件联系" },
+            { "GitHub Issues", "GitHub 问题反馈" },
+            { "Licenses && Source", "许可与源码" },
+            { "Application:", "应用程序：" },
+            { "MIT License", "MIT 许可" },
+            { "Sourcecode", "源代码" },
+            // 注意：上游 key 结尾是半角冒号，中文版换成了全角冒号，措辞保持不变。
+            { "Font Awesome:", "Font Awesome：" },
+            { "CC BY 4.0 License", "CC BY 4.0 许可" },
+
+            // ---------- Countdown.Designer.cs（7 个新 key / 12 处引用）----------
+            // "Pause" / "Set a new countdown" / "Countdown" 已在上方登记，这里不重复。
+            { "Shutdown Timer Countdown", "定时关机助手 - 倒计时" },
+            { "Shows the time left until power action gets executed.", "显示距离执行电源动作的剩余时间。" },
+            { "Stop and exit", "停止并退出" },
+            { "Reset timer", "重置计时" },
+            { "Restart application", "重启程序" },
+            { "Move to background", "最小化到后台" },
+            { "Show countdown window", "显示倒计时窗口" },
+
+            // ---------- InputBox.Designer.cs（2 个 key / 2 处引用）----------
+            { "OK", "确定" },
+            { "Cancel", "取消" }
         };
 
         /// <summary>

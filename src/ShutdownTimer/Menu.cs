@@ -34,6 +34,14 @@ namespace ShutdownTimer
 
         private void Menu_Load(object sender, EventArgs e)
         {
+            // 下拉框必须在 LoadArgs() / LoadSettings()（由 Menu_Shown 触发，晚于 Load）之前填好，
+            // 否则 SelectValue() 会因为 Items.Count == 0 而静默 no-op。
+            // 这行以前是手工插在 InitializeComponent() 里的：在 VS 里打开设计器拖动控件，
+            // 重新生成 InitializeComponent() 就会把它无声删掉，所以必须放在这里。
+            LocalizedCatalog.Fill(actionComboBox, LocalizedCatalog.PowerActions(), "Shutdown");
+
+            ApplyTexts();
+
             ExceptionHandler.Log("Check multiple instances setting");
 
             if (!SettingsProvider.Settings.EnableMultipleInstances)
@@ -70,6 +78,42 @@ namespace ShutdownTimer
             Localization.ApplyTo(this);
 
             ExceptionHandler.Log("Form initialized");
+        }
+
+        /// <summary>
+        /// 用 <see cref="Strings"/> 查表覆盖 <c>Menu.Designer.cs</c> 里硬编码的中文文案。
+        ///
+        /// 为什么不在 Designer 里直接改：<c>*.Designer.cs</c> 是 VS 自动生成的，
+        /// 手工写进去的改动在下次打开设计器、拖动控件时会连同 InitializeComponent()
+        /// 一起被重新生成覆盖掉。Designer 里的中文因此原样保留（开发者在设计器里
+        /// 看到的仍是中文），运行时由本方法用同一份查表结果覆盖，界面行为零变化。
+        ///
+        /// key 一律是上游的英文原文，与 <c>upstream/master</c> 的 Designer 逐字一致。
+        /// </summary>
+        private void ApplyTexts()
+        {
+            Text = Strings.T("Shutdown Timer");
+            AccessibleName = Strings.T("Shutdown Timer");
+            AccessibleDescription = Strings.T("The main window where you can choose the time and power action.");
+
+            titleLabel.Text = Strings.T("Shutdown Timer");
+
+            hoursLabel.Text = Strings.T("Hours");
+            minutesLabel.Text = Strings.T("Minutes");
+            secondsLabel.Text = Strings.T("Seconds");
+
+            timeGroupBox.Text = Strings.T("When to do it?");
+            timeOfDayModeRadioButton.Text = Strings.T("At a specific time of day");
+            countdownModeRadioButton.Text = Strings.T("After a specific timespan");
+
+            actionGroupBox.Text = Strings.T("What to do?");
+            actionLabel.Text = Strings.T("Select an action:");
+            preventSleepCheckBox.Text = Strings.T("Prevent system from going to sleep");
+            gracefulCheckBox.Text = Strings.T("Graceful (do not force close apps)");
+            backgroundCheckBox.Text = Strings.T("Run in background");
+
+            startButton.Text = Strings.T("Start");
+            infoToolTip.ToolTipTitle = Strings.T("Help");
         }
 
         private void Menu_Shown(object sender, EventArgs e)

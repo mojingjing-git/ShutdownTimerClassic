@@ -244,7 +244,6 @@
             this.actionComboBox.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.actionComboBox.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.actionComboBox.FormattingEnabled = true;
-            LocalizedCatalog.Fill(this.actionComboBox, LocalizedCatalog.PowerActions(), "Shutdown");
             this.actionComboBox.Location = new System.Drawing.Point(99, 19);
             this.actionComboBox.Name = "actionComboBox";
             this.actionComboBox.Size = new System.Drawing.Size(147, 21);

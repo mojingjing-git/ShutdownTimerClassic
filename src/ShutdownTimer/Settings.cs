@@ -1,5 +1,6 @@
 ﻿using ShutdownTimer.Helpers;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -14,6 +15,19 @@ namespace ShutdownTimer
 
         private void Settings_Load(object sender, EventArgs e)
         {
+            // 下拉框必须排在下面的 LoadSettings() 之前：LoadSettings() 内部调 SelectValue()，
+            // 而 SelectValue() 首行就是 if (box.Items.Count == 0) return;
+            // 填晚了就会静默 no-op → 下拉框 0 项 → GetValue() 返回 box.Text = "" →
+            // settings.json 被写成 "Action": "" / "TrayIconTheme": ""，用户默认动作永久丢失。
+            // 这两行以前是手工插在 InitializeComponent() 里的，在 VS 设计器里拖一次控件
+            // 就会被重新生成无声删除，所以必须搬到这里。
+            LocalizedCatalog.Fill(actionComboBox, LocalizedCatalog.PowerActions(), "Shutdown");
+            LocalizedCatalog.Fill(trayiconThemeComboBox, LocalizedCatalog.TrayIconThemes(), "Automatic");
+            Debug.Assert(actionComboBox.Items.Count > 0, "actionComboBox 必须在 LoadSettings() 之前填充");
+            Debug.Assert(trayiconThemeComboBox.Items.Count > 0, "trayiconThemeComboBox 必须在 LoadSettings() 之前填充");
+
+            ApplyTexts();
+
             appLabel.Text = Strings.T("Shutdown Timer Classic") + "@v" + Application.ProductVersion.Remove(Application.ProductVersion.LastIndexOf("."));
 #if DEBUG
             appLabel.Text += "_debug";
@@ -23,6 +37,113 @@ namespace ShutdownTimer
             Localization.ApplyTo(this);
 
             LoadSettings();
+        }
+
+        /// <summary>
+        /// 用 <see cref="Strings"/> 查表覆盖 <c>Settings.Designer.cs</c> 里硬编码的中文文案。
+        ///
+        /// 为什么不在 Designer 里直接改：<c>*.Designer.cs</c> 是 VS 自动生成的，
+        /// 手工写进去的改动在下次打开设计器、拖动控件时会连同 InitializeComponent()
+        /// 一起被重新生成覆盖掉。Designer 里的中文因此原样保留（开发者在设计器里
+        /// 看到的仍是中文），运行时由本方法用同一份查表结果覆盖，界面行为零变化。
+        ///
+        /// key 一律是上游的英文原文，与 <c>upstream/master</c> 的 Designer 逐字一致。
+        /// 译文照抄 Designer 里已有的中文，不改措辞、不改标点。
+        /// </summary>
+        private void ApplyTexts()
+        {
+            Text = Strings.T("Shutdown Timer - Settings");
+
+            titleLabel.Text = Strings.T("Settings");
+            footerLabel.Text = Strings.T("Made with love in Germany");
+            githubLinkLabel.Text = Strings.T("View on GitHub");
+
+            // 常规
+            tabPage1.Text = Strings.T("General");
+            groupBox1.Text = Strings.T("Application behaviour");
+            enableMultipleInstances.Text = Strings.T("Allow multiple instances");
+            rememberLastScreenPositionCountdown.Text = Strings.T("Remember last screen position (Countdown)");
+            rememberLastScreenPositionUI.Text = Strings.T("Remember last screen position (Menu)");
+            trayiconGroupBox.Text = Strings.T("System tray menu");
+            trayiconThemeLabel.Text = Strings.T("Trayicon theme:");
+            clearSettingsButton.Text = Strings.T("Clear Settings");
+            defaultSettingsGroupBox.Text = Strings.T("Timer defaults");
+            customDefaultsGroupBox.Text = Strings.T("Custom defaults");
+            timeOfDayModeRadioButton.Text = Strings.T("At a specific time of day");
+            countdownModeRadioButton.Text = Strings.T("After a specific timespan");
+            secondsLabel.Text = Strings.T("Seconds");
+            hoursLabel.Text = Strings.T("Hours");
+            minutesLabel.Text = Strings.T("Minutes");
+            preventSleepCheckBox.Text = Strings.T("Prevent system from going to sleep");
+            gracefulCheckBox.Text = Strings.T("Graceful (do not force close apps)");
+            backgroundCheckBox.Text = Strings.T("Run in background");
+            actionLabel.Text = Strings.T("Select an action:");
+            rememberStateCheckBox.Text = Strings.T("Remember last state");
+
+            // 高级
+            tabPage2.Text = Strings.T("Advanced");
+            forceFlagGroupBox.Text = Strings.T("Force flag");
+            forceFlagLabel.Text = Strings.T("Changes how running applications are force-closed when\r\nusing a non-graceful shutdown.");
+            forceFlagDocsLinkLabel.Text = Strings.T("Documentation");
+            countdownGroupBox.Text = Strings.T("Countdown window");
+            disableAlwaysOnTopCheckBox.Text = Strings.T("Disable always on top behaviour");
+            disableAnimationsCheckBox.Text = Strings.T("Disable animations");
+            setBackgroundColorLinkLabel.Text = Strings.T("(set background color)");
+            disableNotificationsCheckBox.Text = Strings.T("Disable notifications and confirmations");
+            enableAdaptiveCountdownTextSizeCheckBox.Text = Strings.T("Adapt clock text to window size");
+            transparentWindowCheckBox.Text = Strings.T("Transparent countdown window");
+            hideTrayIconCheckBox.Text = Strings.T("Hide tray icon (not recommended)");
+            passwordGroupBox.Text = Strings.T("Password protection");
+            passwordLabel.Text = Strings.T("Locks the countdown UI with a password you can set when starting a shutdown after clicking start.");
+            passwordCheckBox.Text = Strings.T("Enable password protection");
+            developerGroupBox.Text = Strings.T("Developer Options");
+            saveLogsCheckBox.Text = Strings.T("Save event logs to appdata on exit");
+            openAppDataLinkLabel.Text = Strings.T("Open appdata folder");
+
+            // 关于
+            tabPage3.Text = Strings.T("About");
+            aboutGroupBox.Text = Strings.T("About this app");
+            logButton.Text = Strings.T("Create Logfile");
+            emailbutton.Text = Strings.T("Email");
+            githubButton.Text = Strings.T("GitHub Issues");
+            licenseGroupBox.Text = Strings.T("Licenses && Source");
+            appInfoLabel.Text = Strings.T("Application:");
+            appLicenseLinkLabel.Text = Strings.T("MIT License");
+            appSourceLinkLabel.Text = Strings.T("Sourcecode");
+            faInfoLabel.Text = Strings.T("Font Awesome:");
+            faLicenseLinkLabel.Text = Strings.T("CC BY 4.0 License");
+            faSourceLinkLabel.Text = Strings.T("Sourcecode");
+
+            ReflowAboutButtons();
+        }
+
+        /// <summary>
+        /// 「关于」页底部三个按钮按实际渲染宽度重新排布。
+        ///
+        /// 为什么需要：<c>Button.AutoSize</c> 默认是 true，本项目全项目没有一处显式设成 false
+        /// （Designer 里的 <c>Size</c> 只是初始值）。汉化把这三个按钮的文本换成更长的中文后，
+        /// 按钮会自动变宽，而 Designer 里 <c>emailbutton</c> 结束于 x=172、<c>githubButton</c>
+        /// 起于 x=178 —— 只有 6px 间隙，于是 <c>githubButton</c> 自动扩展后的左边缘被
+        /// <c>emailbutton</c> 的边框盖住，「GitHub 问题反馈」被截成「Hub 问题反馈」。
+        ///
+        /// 注意：这跟"文本超出控件被 Clip"是两回事。只用
+        /// <c>TextRenderer.MeasureText(text, font) &gt; control.ClientSize.Width</c> 检测是
+        /// 查不出来的——按钮自己已经变宽到能装下文本，问题是它压到了邻居身上。
+        ///
+        /// 所以这里按顺序重排 <c>Left</c>，保持统一的间隙，从第一个按钮的原位开始，
+        /// 这样改动最小，也不会把整行推出 <c>aboutGroupBox</c>。
+        /// </summary>
+        private void ReflowAboutButtons()
+        {
+            const int gap = 8;
+            Button[] row = { logButton, emailbutton, githubButton };
+
+            int left = row[0].Left;
+            foreach (Button button in row)
+            {
+                button.Left = left;
+                left = button.Right + gap;
+            }
         }
 
         private void Settings_FormClosing(object sender, FormClosingEventArgs e)
