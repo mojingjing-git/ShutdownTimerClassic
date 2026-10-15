@@ -1,7 +1,10 @@
 ﻿using ShutdownTimer.Helpers;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ShutdownTimer
@@ -165,18 +168,22 @@ namespace ShutdownTimer
         {
             ExceptionHandler.Log("Start requested");
 
-            (bool allChecksPassed, string listOfErrorsFound, string listOfWarningsFound) = RunChecks();
+            CheckResult checkResult = RunChecks();
 
-            if (!allChecksPassed)
+            if (!checkResult.AllChecksPassed)
             {
                 ExceptionHandler.Log("Start aborted: failing checks");
-                MessageBox.Show("发生以下错误：\n\n" + listOfErrorsFound + "请解决上述问题后重试。", "似乎出现了问题！", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    Strings.T("The following error(s) occurred:\n\n") + Render(checkResult, IssueSeverity.Error) + Strings.T("Please resolve the problem(s) and try again."),
+                    Strings.T("There seems to be a problem!"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            if (!listOfWarningsFound.Equals(""))
+            if (checkResult.Issues.Any(i => i.Severity == IssueSeverity.Warning))
             {
-                if (MessageBox.Show(listOfWarningsFound + "是否仍要继续？", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes)
+                // 注意结尾的 "\n\n"：上游英文是靠最后一条警告自带的 "\n\n" 把这句提示顶到下一段，
+                // 拆成独立 Issue 后那条换行没了，必须在这里补回来，否则会连成一行。
+                if (MessageBox.Show(Render(checkResult, IssueSeverity.Warning) + "\n\n" + Strings.T("Do you wish to continue?"), Strings.T("Warning"), MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) != DialogResult.Yes)
                 {
                     ExceptionHandler.Log("User didn't accept the warnings; aborting");
                     return;
@@ -245,26 +252,66 @@ namespace ShutdownTimer
         #endregion
 
         /// <summary>
+        /// <see cref="RunChecks"/> 的产物：只装结构化结果，文案在渲染时才查表。
+        /// </summary>
+        private sealed class CheckResult
+        {
+            /// <summary>只有一条 <see cref="IssueSeverity.Error"/> 就会阻断启动，且无法被用户确认绕过。</summary>
+            public bool AllChecksPassed => !Issues.Any(i => i.Severity == IssueSeverity.Error);
+
+            public List<Issue> Issues { get; } = new List<Issue>();
+        }
+
+        /// <summary>
+        /// TimeSpan 换算失败（B5）用的英文原文键。
+        /// </summary>
+        /// <remarks>
+        /// <b>安全约束：这个 key 对应的 Issue 必须是 <see cref="IssueSeverity.Error"/>，永远不能改成
+        /// <see cref="IssueSeverity.Warning"/>。</b>
+        /// <br />
+        /// 原因：B5 触发时倒计时的目标时刻根本没算出来。若它只是警告，用户会看到一个「是否仍要继续？」
+        /// 警告框，点「是」就带着一个算不出来的时间跨度直接进入倒计时并执行关机动作——
+        /// 从「明确报错」退化成「静默错误」，可能直接关机。这是本次改造里唯一能出人命的约束，
+        /// 因此下方 <see cref="RunChecks"/> 里对它加了 <see cref="Debug.Assert"/>。
+        /// </remarks>
+        private const string KeyTimeSpanConversionFailed = "TimeSpan conversion failed! Please check if your time values are within a reasonable range or represent a valid time of day, if you used the time of day mode.";
+
+        /// <summary>
+        /// 把指定级别的检查结果渲染成一段界面文本：逐条查表，段与段之间用一个空行分隔。
+        /// </summary>
+        private static string Render(CheckResult result, IssueSeverity severity)
+        {
+            return string.Join("\n\n", result.Issues.Where(i => i.Severity == severity).Select(i => Strings.T(i.Key, i.Args)));
+        }
+
+        /// <summary>
         /// Checks user input before further processing
         /// </summary>
-        /// <returns>Report of all failed checks</returns>
-        private (bool allChecksPassed, string listOfErrorsFound, string ListOfWarningsFound) RunChecks()
+        /// <returns>全部检查结果：错误与警告以 <see cref="IssueSeverity"/> 区分，错误优先阻断启动</returns>
+        private CheckResult RunChecks()
         {
             ExceptionHandler.Log("Running checks...");
 
-            string errMessages = ""; // error messages will append to this
-            string warnMessages = ""; // warning messages will append to this
+            CheckResult result = new CheckResult();
 
             // Check if chosen action is a valid option
             if (actionComboBox.SelectedItem == null)
             {
-                errMessages += "请从下拉菜单中选择一个有效动作！\n\n";
+                result.Issues.Add(new Issue
+                {
+                    Key = "Please select a valid action from the dropdown menu!",
+                    Severity = IssueSeverity.Error
+                });
             }
 
             // Check if all time values are zero when in countdown mode
             if (hoursNumericUpDown.Value == 0 && minutesNumericUpDown.Value == 0 && secondsNumericUpDown.Value == 0 && countdownModeRadioButton.Checked)
             {
-                errMessages += "倒计时模式下，计时不能从 0 开始！\n\n";
+                result.Issues.Add(new Issue
+                {
+                    Key = "The timer cannot start at 0 when in countdown mode!",
+                    Severity = IssueSeverity.Error
+                });
             }
 
             // Respective check for either countdown or timeOfDay mode
@@ -276,8 +323,13 @@ namespace ShutdownTimer
                 // Sanity check
                 if (ts.TotalDays > 100)
                 {
-                    warnMessages += $"你设置的时间相当于 {Math.Round(ts.TotalDays)} 天（约 {Math.Round(ts.TotalDays / 365, 2)} 年）！\n" +
-                        "这时间有点长，本程序从未针对如此长的运行时设计，祝你好运！\n\n";
+                    // 传原始 double（保留几位小数由译文决定），不要传 Math.Round 之后插值好的字符串。
+                    result.Issues.Add(new Issue
+                    {
+                        Args = new object[] { Math.Round(ts.TotalDays), Math.Round(ts.TotalDays / 365, 2) },
+                        Key = "Your chosen time equates to {0} days ({1} years)!\nThis is a bit much, and the application was never designed for this kind of runtime, so good luck!",
+                        Severity = IssueSeverity.Warning
+                    });
                 }
 
                 // Check for time discontinuities when using timeOfDay mode
@@ -290,16 +342,44 @@ namespace ShutdownTimer
 
                     if (diff.TotalSeconds != 0)
                     {
-                        warnMessages += $"倒计时期间你的本地时钟会发生跳变！实际结束时刻与你设定的目标相差 {Math.Abs(diff.TotalSeconds)} 秒，约合 {Math.Abs(diff.TotalHours)} 小时。这通常由夏令时切换或本地时区的其它时间调整事件引起。\n\n" +
-                            $"倒计时按当前时刻与你设定的 {nowReference.Add(ts):HH:mm:ss} 之差计算。" +
-                            $"但计时结束时，你的时钟会显示 {actualEnd:HH:mm:ss}。\n\n" +
-                            $"倒计时始终采用简单算术，而不会考虑时区规则，请留意这一差异！\n\n";
+                        // 原本是一整段中文，拆成 4 条：每条一个语义单元，译者才能调整语序。
+                        // Args 一律传原始值：秒/小时传 double，时刻传 DateTimeOffset，
+                        // 格式说明（{0:HH:mm:ss}）写进 key，绝不在这里预先插值。
+                        result.Issues.Add(new Issue
+                        {
+                            Args = new object[] { Math.Abs(diff.TotalSeconds), Math.Abs(diff.TotalHours) },
+                            Key = "Your local clock will shift during this countdown! The actual time the countdown will end on diverges from your target by {0} seconds, that's {1} hour(s). This can be caused by daylight savings transition or other scheduled events in your local timezone.",
+                            Severity = IssueSeverity.Warning
+                        });
+                        result.Issues.Add(new Issue
+                        {
+                            Args = new object[] { nowReference.Add(ts) },
+                            Key = "The countdown will use the difference between now and your target of {0:HH:mm:ss}.",
+                            Severity = IssueSeverity.Warning
+                        });
+                        result.Issues.Add(new Issue
+                        {
+                            Args = new object[] { actualEnd },
+                            Key = "However, your clock will display {0:HH:mm:ss} when the timer ends.",
+                            Severity = IssueSeverity.Warning
+                        });
+                        result.Issues.Add(new Issue
+                        {
+                            Key = "The countdown will always use simple arithmetic instead of relying on timezone-aware calculation. Please be aware of this discrepancy!",
+                            Severity = IssueSeverity.Warning
+                        });
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                errMessages += "时间跨度换算失败！请检查各时间值是否在合理范围内；如果你使用了定时模式，请确认所填时刻是否有效。\n\n";
+                ExceptionHandler.Log("TimeSpan conversion check failed: " + ex.GetType().Name + ": " + ex.Message);
+                // 安全约束：见 KeyTimeSpanConversionFailed 的注释——必须是 Error。
+                result.Issues.Add(new Issue
+                {
+                    Key = KeyTimeSpanConversionFailed,
+                    Severity = IssueSeverity.Error
+                });
             }
 
             // Check if we can get permissions forExitWindowsEx() (used for shutdown/reboot/logoff)
@@ -313,21 +393,36 @@ namespace ShutdownTimer
             }
             catch (Win32Exception ex)
             {
-                errMessages += "权限不足，无法向 Windows 申请关机/重启/注销所需的权限。错误信息：" + ex.Message + "\n\n";
-                errMessages += "如需了解此问题的详细信息，请进入应用设置页面，在“关于”选项卡中点击“创建日志文件”。";
+                // 拆成两条独立 Issue：上游靠第一条自带的 "\n\n" 把第二条顶下去，
+                // 那条换行在旧的中文硬编码里已经丢了，会让两句话连成一行。
+                result.Issues.Add(new Issue
+                {
+                    Args = new object[] { ex.Message },
+                    Key = "Permission failure. Couldn't enable the required privliges for Shutdown/Restart/Logout from Windows. Error: {0}",
+                    Severity = IssueSeverity.Error
+                });
+                result.Issues.Add(new Issue
+                {
+                    Key = "To learn more about this issue, please go the application's settings and in the \"About\"-tab, click on \"Create Logfile\".",
+                    Severity = IssueSeverity.Error
+                });
             }
 
-            if (errMessages.Equals(""))
+            Debug.Assert(
+                result.Issues.Where(i => i.Key == KeyTimeSpanConversionFailed).All(i => i.Severity == IssueSeverity.Error),
+                "B5 (TimeSpan conversion failed) must stay IssueSeverity.Error: the target time could not be computed, and a Warning would let the user confirm and shut the machine down anyway.");
+
+            if (result.AllChecksPassed)
             {
                 ExceptionHandler.Log("Ran all checks, no errors found.");
-                return (true, errMessages, warnMessages);
             }
             else
             {
-                ExceptionHandler.Log("Ran all checks, the following errors have been found:\n" + errMessages);
-                ExceptionHandler.Log("as well as the following warnings:\n" + warnMessages);
-                return (false, errMessages, warnMessages);
+                ExceptionHandler.Log("Ran all checks, the following errors have been found:\n" + Render(result, IssueSeverity.Error));
+                ExceptionHandler.Log("as well as the following warnings:\n" + Render(result, IssueSeverity.Warning));
             }
+
+            return result;
         }
 
         /// <summary>
@@ -449,5 +544,40 @@ namespace ShutdownTimer
             ExceptionHandler.Log("Starting timer");
             Timer.Start(password, !backgroundCheckBox.Checked);
         }
+    }
+
+    /// <summary>
+    /// 一条检查结果的严重级别。
+    /// </summary>
+    /// <remarks>
+    /// 关键安全约定：只要存在 <see cref="Error"/>，<see cref="Menu"/> 的检查结果就会阻断启动，
+    /// 用户无法点「仍然继续」绕过。<see cref="Warning"/> 则允许用户确认后继续，
+    /// 因此任何「结果不可信、算出来的值不能用」的情况都必须标成
+    /// <see cref="Error"/>，不能标成 <see cref="Warning"/>。
+    /// </remarks>
+    internal enum IssueSeverity { Error, Warning }
+
+    /// <summary>
+    /// 一条检查结果：只描述「发生了什么」，不持有任何已渲染的界面文本。
+    /// </summary>
+    /// <remarks>
+    /// 注意：本类型（连同 <see cref="IssueSeverity"/>）必须留在 Menu.cs 的 <b>Menu 类之后</b>。
+    /// MSBuild 的 CreateCSharpManifestResourceName 用「同名 .cs 文件里第一个声明的类型」决定
+    /// Menu.resx 的清单资源名；一旦把 Issue 提到 Menu 前面，资源名会变成
+    /// ShutdownTimer.Issue.resources，Designer 里的
+    /// <c>new ResourceManager("ShutdownTimer.Menu", …)</c> 就找不到图标，程序一启动就崩溃。
+    /// </remarks>
+    internal sealed class Issue
+    {
+        /// <summary>英文原文键，交由 <see cref="Strings.T(string, object[])"/> 查表。</summary>
+        public string Key { get; set; }
+
+        /// <summary>
+        /// 格式化参数，<b>必须传原始值</b>（DateTimeOffset / double 等），不要传插值好的字符串：
+        /// 格式说明（如 <c>{0:HH:mm:ss}</c>）写在 <see cref="Key"/> 里，由译文决定怎么排版。
+        /// </summary>
+        public object[] Args { get; set; }
+
+        public IssueSeverity Severity { get; set; }
     }
 }

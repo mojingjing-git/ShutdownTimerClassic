@@ -110,6 +110,39 @@ namespace ShutdownTimer.Helpers
             { "Will count down from the hours, minutes and seconds selected below,\nlike a countdown timer, and execute the power action when it reaches zero.", "从下方设置的时、分、秒开始倒数，\n就像普通计时器一样，归零后执行所选动作。" },
             { "In this mode you can select the target time of day (24h clock) for the power action.\nIf the time has already passed, it will roll over to tomorrow.\n\nWhen you press start, the appropriate countdown will be calculated.\n", "在此模式下可选择目标时刻（24 小时制）。\n若该时刻已过，将自动顺延至次日。\n\n点击开始后，程序会据此计算倒计时时长。\n" },
 
+            // ===== Menu.cs RunChecks()（14 个新 key）=====
+            // 这些 key 的 Args 一律传原始值（DateTimeOffset / double），
+            // 格式说明写在 key 里，换行符必须与 key 完全一致。
+            // "Warning" 已在上面的对话框标题一节登记，这里不重复。
+
+            // ---------- 错误框的页眉 / 页脚 / 标题 ----------
+            { "The following error(s) occurred:\n\n",                "发生以下错误：\n\n" },
+            { "Please resolve the problem(s) and try again.",         "请解决上述问题后重试。" },
+            { "There seems to be a problem!",                        "似乎出现了问题！" },
+
+            // ---------- 警告框的收尾问句（标题 "Warning" 复用已有条目）----------
+            { "Do you wish to continue?",                             "是否仍要继续？" },
+
+            // ---------- 六个检查分支 ----------
+            // B1：未选择动作
+            { "Please select a valid action from the dropdown menu!", "请从下拉菜单中选择一个有效动作！" },
+            // B2：倒计时模式从 0 开始
+            { "The timer cannot start at 0 when in countdown mode!",  "倒计时模式下，计时不能从 0 开始！" },
+            // B3：时间跨度超过 100 天（天数 / 年数传原始 double）
+            { "Your chosen time equates to {0} days ({1} years)!\nThis is a bit much, and the application was never designed for this kind of runtime, so good luck!", "你设置的时间相当于 {0} 天（约 {1} 年）！\n这时间有点长，本程序从未针对如此长的运行时设计，祝你好运！" },
+            // B4：时钟跳变——拆成 4 条，每条一个语义单元，译者才能调语序。
+            // 注意第 2 条原本和第 3 条是紧挨着的两句（……之差计算。但计时结束时，……），
+            // 拆开后会由 string.Join("\n\n", ...) 在两句之间多出一个空行，属于刻意接受的排版变化。
+            { "Your local clock will shift during this countdown! The actual time the countdown will end on diverges from your target by {0} seconds, that's {1} hour(s). This can be caused by daylight savings transition or other scheduled events in your local timezone.", "倒计时期间你的本地时钟会发生跳变！实际结束时刻与你设定的目标相差 {0} 秒，约合 {1} 小时。这通常由夏令时切换或本地时区的其它时间调整事件引起。" },
+            { "The countdown will use the difference between now and your target of {0:HH:mm:ss}.", "倒计时按当前时刻与你设定的 {0:HH:mm:ss} 之差计算。" },
+            { "However, your clock will display {0:HH:mm:ss} when the timer ends.", "但计时结束时，你的时钟会显示 {0:HH:mm:ss}。" },
+            { "The countdown will always use simple arithmetic instead of relying on timezone-aware calculation. Please be aware of this discrepancy!", "倒计时始终采用简单算术，而不会考虑时区规则，请留意这一差异！" },
+            // B5：TimeSpan 换算失败。安全约束：severity 必须为 Error，详见 Menu.KeyTimeSpanConversionFailed。
+            { "TimeSpan conversion failed! Please check if your time values are within a reasonable range or represent a valid time of day, if you used the time of day mode.", "时间跨度换算失败！请检查各时间值是否在合理范围内；如果你使用了定时模式，请确认所填时刻是否有效。" },
+            // B6：权限不足——拆成两条独立 Issue，修复上游漏掉的 "\n\n"（否则两句话会连成一行）。
+            { "Permission failure. Couldn't enable the required privliges for Shutdown/Restart/Logout from Windows. Error: {0}", "权限不足，无法向 Windows 申请关机/重启/注销所需的权限。错误信息：{0}" },
+            { "To learn more about this issue, please go the application's settings and in the \"About\"-tab, click on \"Create Logfile\".", "如需了解此问题的详细信息，请进入应用设置页面，在“关于”选项卡中点击“创建日志文件”。" },
+
             // ===== Settings.cs =====
             { "Disabling the tray icon will prevent you from interacting with the application when it's running in the background.\nYour only choice in such a case is to kill the application with Task Manager.\n\nNotifications will also stop working!\n\nAre you sure you want to enable this option?", "禁用托盘图标后，程序在后台运行时将无法与其交互。\n遇到这种情况你只能用任务管理器强制结束程序。\n\n通知功能也会随之失效！\n\n确定要启用该选项吗？" },
 
