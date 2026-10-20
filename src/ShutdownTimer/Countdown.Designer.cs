@@ -201,8 +201,8 @@
             this.AccessibleDescription = "显示距离执行电源动作的剩余时间。";
             this.AccessibleName = "定时关机助手 - 倒计时";
             this.AccessibleRole = System.Windows.Forms.AccessibleRole.Alert;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.RoyalBlue;
             this.ClientSize = new System.Drawing.Size(359, 146);
             this.ContextMenuStrip = this.contextMenuStrip;

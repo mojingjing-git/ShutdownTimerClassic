@@ -299,8 +299,8 @@
             this.AcceptButton = this.startButton;
             this.AccessibleDescription = "主窗口：在此选择定时与电源动作。";
             this.AccessibleName = "定时关机助手";
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(284, 348);
             this.Controls.Add(this.settingsButton);
             this.Controls.Add(this.versionLabel);
